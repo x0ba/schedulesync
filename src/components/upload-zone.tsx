@@ -256,13 +256,21 @@ export function UploadZone() {
                       <Calendar className="size-3.5" />
                       {event.isOneTime && event.date ? (
                         <span>
-                          {new Date(
-                            event.date + "T12:00:00",
-                          ).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                          {(() => {
+                            try {
+                              const formattedDate = new Date(event.date + "T12:00:00");
+                              if (isNaN(formattedDate.getTime())) {
+                                return "Invalid date";
+                              }
+                              return formattedDate.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              });
+                            } catch {
+                              return event.date; // Fallback to raw string
+                            }
+                          })()}
                         </span>
                       ) : (
                         event.dayOfWeek
