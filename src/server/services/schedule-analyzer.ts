@@ -135,6 +135,7 @@ IMPORTANT GUIDELINES:
   * Regular recurring classes should have isOneTime set to false or omitted
   * One-time events like "Final Exam", "Midterm", or any event with a specific date should have isOneTime set to true
   * If you see a specific date for an event, extract it in YYYY-MM-DD format
+  * For one-time events with a specific date, still provide the dayOfWeek field based on the date or the day column it appears in
 
 Extract any visible semester or date range information.`,
           },
