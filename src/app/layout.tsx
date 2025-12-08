@@ -7,9 +7,9 @@ import { Geist } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 
 export const metadata: Metadata = {
-  title: "ScheduleSync - Turn Screenshots into Calendar Events",
+  title: "",
   description:
-    "Upload a screenshot of your course schedule and generate calendar files you can import into Google Calendar, Apple Calendar, or Outlook.",
+    "",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
