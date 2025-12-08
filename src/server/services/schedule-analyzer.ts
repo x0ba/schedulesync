@@ -55,14 +55,14 @@ export async function analyzeScheduleImage(
 
   let imageData: { type: "image"; image: URL | Uint8Array; mimeType?: string };
 
-  if (matches) {
+  if (matches && typeof matches[1] === "string" && typeof matches[2] === "string") {
     // It's a data URL - convert base64 to Uint8Array
     const mimeType = matches[1] as
       | "image/png"
       | "image/jpeg"
       | "image/webp"
       | "image/gif";
-    const base64Data = matches[2]!;
+    const base64Data = matches[2];
     const binaryString = atob(base64Data);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
