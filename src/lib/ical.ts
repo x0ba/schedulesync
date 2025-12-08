@@ -67,13 +67,20 @@ export function generateICalFile(options: GenerateICalOptions): string {
 
     // Handle one-time events differently
     if (event.isOneTime && event.date) {
-      // Parse the specific date for one-time events
-      const [year, month, day] = event.date.split("-").map(Number);
+      // Parse the specific date for one-time events with validation
+      const dateParts = event.date.split("-");
+      if (dateParts.length !== 3) {
+        throw new Error(`Invalid date format: ${event.date}`);
+      }
+      const [year, month, day] = dateParts.map(Number);
+      if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+        throw new Error(`Invalid date values: ${event.date}`);
+      }
       const [startHours, startMinutes] = event.startTime.split(":").map(Number);
       const [endHours, endMinutes] = event.endTime.split(":").map(Number);
 
-      startDate = new Date(year!, month! - 1, day!, startHours, startMinutes);
-      endDate = new Date(year!, month! - 1, day!, endHours, endMinutes);
+      startDate = new Date(year, month - 1, day, startHours, startMinutes);
+      endDate = new Date(year, month - 1, day, endHours, endMinutes);
     } else if (event.isOneTime) {
       // One-time event without a specific date - use next occurrence of that day
       startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
