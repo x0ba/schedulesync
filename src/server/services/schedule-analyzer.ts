@@ -50,20 +50,32 @@ export type Schedule = z.infer<typeof scheduleSchema>;
 export async function analyzeScheduleImage(
   base64Image: string
 ): Promise<Schedule> {
-  // Extract the actual base64 data and mime type from data URL
-  const matches = base64Image.match(/^data:(.+);base64,(.+)$/);
+  // Validate input: check data URL format and restrict MIME types
+  const dataUrlRegex = /^data:(image\/png|image\/jpeg|image\/webp|image\/gif);base64,([A-Za-z0-9+/=]+)$/;
+  const matches = base64Image.match(dataUrlRegex);
 
   let imageData: { type: "image"; image: URL | Uint8Array; mimeType?: string };
 
-  if (matches && typeof matches[1] === "string" && typeof matches[2] === "string") {
-    // It's a data URL - convert base64 to Uint8Array
+  if (matches) {
+    // Validate base64 size (limit to 5MB decoded)
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
     const mimeType = matches[1] as
       | "image/png"
       | "image/jpeg"
       | "image/webp"
       | "image/gif";
-    const base64Data = matches[2];
-    const binaryString = atob(base64Data);
+    const base64Data = matches[2]!;
+    // Calculate decoded size
+    const decodedSize = Math.floor(base64Data.length * 3 / 4) - (base64Data.endsWith('==') ? 2 : base64Data.endsWith('=') ? 1 : 0);
+    if (decodedSize > MAX_IMAGE_SIZE) {
+      throw new Error("Image size exceeds maximum allowed size of 5MB.");
+    }
+    let binaryString: string;
+    try {
+      binaryString = atob(base64Data);
+    } catch (e) {
+      throw new Error("Invalid base64 image data.");
+    }
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i);
