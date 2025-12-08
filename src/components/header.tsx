@@ -1,5 +1,12 @@
-import { Button } from "@/components/ui/button";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/nextjs";
 import { Calendar } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   return (
@@ -14,9 +21,16 @@ export function Header() {
           </span>
         </div>
 
-        <Button variant="outline" size="sm">
-          Sign in
-        </Button>
+        <SignedOut>
+          <SignInButton mode="modal">
+            <Button variant="outline" size="sm">
+              Sign in
+            </Button>
+          </SignInButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
       </div>
     </header>
   );
