@@ -1,6 +1,6 @@
 {
     "setup-worktree": [
-        "pnpm install",
+        "pnpm i",
         "cp $ROOT_WORKTREE_PATH/.env .env"
     ]
 }
