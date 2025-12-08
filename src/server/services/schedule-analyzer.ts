@@ -117,7 +117,7 @@ STEP 3 - EXTRACT ALL EVENTS:
 Scan the ENTIRE schedule systematically from left-to-right and top-to-bottom. For each event:
 - Determine which day column it falls under by its horizontal position relative to the day headers
 - Read the start and end times from the time axis
-- Extract the course name/title. Prioritize the course code over the course name.
+- Extract the course name/title for the 'title' field. If a course code is visible (e.g., CS 101), extract it separately in the 'courseCode' field.
 - Extract location/room if visible
 - Extract instructor name if visible
 - Extract course code if visible
