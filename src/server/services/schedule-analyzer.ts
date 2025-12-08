@@ -34,6 +34,18 @@ export const scheduleEventSchema = z.object({
     .string()
     .optional()
     .describe("The course code if visible (e.g., CS 101)"),
+  isOneTime: z
+    .boolean()
+    .optional()
+    .describe(
+      "True if this is a one-time event (e.g., Final Exam) rather than a recurring class",
+    ),
+  date: z
+    .string()
+    .optional()
+    .describe(
+      "For one-time events, the specific date in YYYY-MM-DD format (e.g., 2024-12-15)",
+    ),
 });
 
 export const scheduleSchema = z.object({
@@ -48,7 +60,7 @@ export type ScheduleEvent = z.infer<typeof scheduleEventSchema>;
 export type Schedule = z.infer<typeof scheduleSchema>;
 
 export async function analyzeScheduleImage(
-  base64Image: string
+  base64Image: string,
 ): Promise<Schedule> {
   // Extract the actual base64 data and mime type from data URL
   const matches = base64Image.match(/^data:(.+);base64,(.+)$/);
@@ -90,16 +102,40 @@ export async function analyzeScheduleImage(
         content: [
           {
             type: "text",
-            text: `Analyze this class schedule image and extract all the events/classes shown. 
-For each event, identify:
-- The course name/title
-- The day(s) of the week it occurs
-- Start and end times (convert to 24-hour format HH:MM)
-- Location/room if visible
-- Instructor name if visible
-- Course code if visible
+            text: `Analyze this class schedule image carefully and extract ALL events/classes shown, including final exams if they are visible.
 
-If a class occurs on multiple days, create a separate event for each day.
+STEP 1 - IDENTIFY THE SCHEDULE FORMAT:
+First, determine the schedule layout:
+- Weekly grid view (days as columns, times as rows)
+- List view (events listed sequentially)
+- Daily view (single day shown)
+
+STEP 2 - IDENTIFY DAY HEADERS:
+If this is a grid view, carefully read the day labels at the top of each column (Monday, Tuesday, etc.) or along the left side. Note their exact positions.
+
+STEP 3 - EXTRACT ALL EVENTS:
+Scan the ENTIRE schedule systematically from left-to-right and top-to-bottom. For each event:
+- Determine which day column it falls under by its horizontal position relative to the day headers
+- Read the start and end times from the time axis
+- Extract the course name/title. Prioritize the course code over the course name.
+- Extract location/room if visible
+- Extract instructor name if visible
+- Extract course code if visible
+- Determine whether this is a one-time event (e.g., "Final Exam", "Midterm", special lecture) - set isOneTime to true for these
+- For one-time events, extract the specific date in YYYY-MM-DD format if visible (set in the 'date' field)
+
+IMPORTANT GUIDELINES:
+- Do NOT skip any events, even if they are small or partially visible
+- Check for events at unusual times (early morning, late evening)
+- Look for overlapping or stacked events in the same time slot
+- If a class occurs on multiple days (e.g., "MWF" or listed separately), create SEPARATE events for each day
+- Verify each event's day by double-checking which column header it aligns with horizontally
+- Use 24-hour format for times (HH:MM)
+- Distinguish between recurring classes and one-time events:
+  * Regular recurring classes should have isOneTime set to false or omitted
+  * One-time events like "Final Exam", "Midterm", or any event with a specific date should have isOneTime set to true
+  * If you see a specific date for an event, extract it in YYYY-MM-DD format
+
 Extract any visible semester or date range information.`,
           },
           imageData,

@@ -62,8 +62,27 @@ export function generateICalFile(options: GenerateICalOptions): string {
   const untilDate = semesterEndDate ?? defaultEndDate;
 
   for (const event of events) {
-    const startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
-    const endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
+    let startDate: Date;
+    let endDate: Date;
+
+    // Handle one-time events differently
+    if (event.isOneTime && event.date) {
+      // Parse the specific date for one-time events
+      const [year, month, day] = event.date.split("-").map(Number);
+      const [startHours, startMinutes] = event.startTime.split(":").map(Number);
+      const [endHours, endMinutes] = event.endTime.split(":").map(Number);
+
+      startDate = new Date(year!, month! - 1, day!, startHours, startMinutes);
+      endDate = new Date(year!, month! - 1, day!, endHours, endMinutes);
+    } else if (event.isOneTime) {
+      // One-time event without a specific date - use next occurrence of that day
+      startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
+      endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
+    } else {
+      // Regular recurring event
+      startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
+      endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
+    }
 
     // Build description
     const descriptionParts: string[] = [];
@@ -71,19 +90,35 @@ export function generateICalFile(options: GenerateICalOptions): string {
     if (event.instructor)
       descriptionParts.push(`Instructor: ${event.instructor}`);
 
-    calendar.createEvent({
-      start: startDate,
-      end: endDate,
-      summary: event.title,
-      location: event.location,
-      description:
-        descriptionParts.length > 0 ? descriptionParts.join("\n") : undefined,
-      repeating: {
-        freq: ICalEventRepeatingFreq.WEEKLY,
-        byDay: [dayToICalDay[event.dayOfWeek]!],
-        until: untilDate,
-      },
-    });
+    // Create event with or without recurrence based on event type
+    if (event.isOneTime) {
+      calendar.createEvent({
+        start: startDate,
+        end: endDate,
+        summary: event.title,
+        location: event.location,
+        description:
+          descriptionParts.length > 0
+            ? descriptionParts.join("\n")
+            : undefined,
+      });
+    } else {
+      calendar.createEvent({
+        start: startDate,
+        end: endDate,
+        summary: event.title,
+        location: event.location,
+        description:
+          descriptionParts.length > 0
+            ? descriptionParts.join("\n")
+            : undefined,
+        repeating: {
+          freq: ICalEventRepeatingFreq.WEEKLY,
+          byDay: [dayToICalDay[event.dayOfWeek]!],
+          until: untilDate,
+        },
+      });
+    }
   }
 
   return calendar.toString();

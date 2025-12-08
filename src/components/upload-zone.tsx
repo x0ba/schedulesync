@@ -236,13 +236,37 @@ export function UploadZone() {
               {events.map((event, index) => (
                 <div
                   key={index}
-                  className="rounded-lg border bg-muted/30 p-3 text-sm"
+                  className={cn(
+                    "rounded-lg border p-3 text-sm transition-colors",
+                    event.isOneTime
+                      ? "border-blue-100 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20"
+                      : "border-transparent bg-muted/30",
+                  )}
                 >
-                  <p className="font-medium">{event.title}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium">{event.title}</p>
+                    {event.isOneTime && (
+                      <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                        One-time
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="size-3.5" />
-                      {event.dayOfWeek}
+                      {event.isOneTime && event.date ? (
+                        <span>
+                          {new Date(
+                            event.date + "T12:00:00",
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </span>
+                      ) : (
+                        event.dayOfWeek
+                      )}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="size-3.5" />
