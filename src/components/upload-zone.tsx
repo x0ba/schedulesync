@@ -1,0 +1,142 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Upload, ImageIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export function UploadZone() {
+  const [isDragging, setIsDragging] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+
+  const handleFile = useCallback((file: File) => {
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    },
+    [handleFile]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+    },
+    [handleFile]
+  );
+
+  const clearPreview = useCallback(() => {
+    setPreview(null);
+    setFileName(null);
+  }, []);
+
+  return (
+    <Card
+      className={cn(
+        "relative overflow-hidden border-2 border-dashed transition-all duration-300",
+        isDragging
+          ? "border-orange-500 bg-orange-50/50 shadow-lg shadow-orange-500/10"
+          : "border-border hover:border-orange-400/50 hover:shadow-md"
+      )}
+    >
+      <CardContent className="p-0">
+        {preview ? (
+          <div className="relative">
+            <img
+              src={preview}
+              alt="Schedule preview"
+              className="max-h-80 w-full object-contain"
+            />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/60 to-transparent p-4 pt-8">
+              <span className="truncate text-sm font-medium text-white">
+                {fileName}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={clearPreview}
+                className="text-white hover:bg-white/20 hover:text-white"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <label
+            htmlFor="schedule-upload"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className="flex cursor-pointer flex-col items-center gap-4 px-8 py-16"
+          >
+            <div
+              className={cn(
+                "flex size-16 items-center justify-center rounded-2xl transition-all duration-300",
+                isDragging
+                  ? "scale-110 bg-orange-500 text-white shadow-lg shadow-orange-500/30"
+                  : "bg-gradient-to-br from-amber-100 to-orange-100 text-orange-600"
+              )}
+            >
+              {isDragging ? (
+                <Upload className="size-7 animate-bounce" />
+              ) : (
+                <ImageIcon className="size-7" />
+              )}
+            </div>
+
+            <div className="text-center">
+              <p className="text-base font-medium text-foreground">
+                {isDragging
+                  ? "Drop your screenshot here"
+                  : "Drop your schedule screenshot"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                or click to browse from your device
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+              <span className="rounded-full bg-muted px-2 py-0.5">PNG</span>
+              <span className="rounded-full bg-muted px-2 py-0.5">JPG</span>
+              <span className="rounded-full bg-muted px-2 py-0.5">WebP</span>
+            </div>
+
+            <input
+              id="schedule-upload"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleInputChange}
+            />
+          </label>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
