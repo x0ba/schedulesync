@@ -76,9 +76,26 @@ export function generateICalFile(options: GenerateICalOptions): string {
       if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
         throw new Error(`Invalid date values: ${event.date}`);
       }
-      const [startHours, startMinutes] = event.startTime.split(":").map(Number);
-      const [endHours, endMinutes] = event.endTime.split(":").map(Number);
 
+      // Validate and parse startTime
+      const startTimeParts = event.startTime.split(":");
+      if (startTimeParts.length !== 2) {
+        throw new Error(`Invalid time format for startTime: ${event.startTime}`);
+      }
+      const [startHours, startMinutes] = startTimeParts.map(Number);
+      if (isNaN(startHours) || isNaN(startMinutes)) {
+        throw new Error(`Invalid time values for startTime: ${event.startTime}`);
+      }
+
+      // Validate and parse endTime
+      const endTimeParts = event.endTime.split(":");
+      if (endTimeParts.length !== 2) {
+        throw new Error(`Invalid time format for endTime: ${event.endTime}`);
+      }
+      const [endHours, endMinutes] = endTimeParts.map(Number);
+      if (isNaN(endHours) || isNaN(endMinutes)) {
+        throw new Error(`Invalid time values for endTime: ${event.endTime}`);
+      }
       startDate = new Date(year, month - 1, day, startHours, startMinutes);
       endDate = new Date(year, month - 1, day, endHours, endMinutes);
     } else if (event.isOneTime) {
