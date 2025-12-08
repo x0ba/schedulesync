@@ -83,6 +83,9 @@ export function generateICalFile(options: GenerateICalOptions): string {
       endDate = new Date(year, month - 1, day, endHours, endMinutes);
     } else if (event.isOneTime) {
       // One-time event without a specific date - use next occurrence of that day
+      if (!event.dayOfWeek) {
+        throw new Error("One-time event without date must have dayOfWeek");
+      }
       startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
       endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
     } else {
