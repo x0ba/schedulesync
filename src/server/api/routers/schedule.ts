@@ -14,7 +14,7 @@ export const scheduleRouter = createTRPCRouter({
     .input(
       z.object({
         imageBase64: z.string().describe("Base64 encoded image data"),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const schedule = await analyzeScheduleImage(input.imageBase64);
@@ -28,7 +28,7 @@ export const scheduleRouter = createTRPCRouter({
         events: eventsInputSchema,
         calendarName: z.string().optional(),
         repeatWeeks: z.number().optional().default(16),
-      })
+      }),
     )
     .mutation(({ input }) => {
       const icalContent = generateICalFile({
@@ -39,4 +39,3 @@ export const scheduleRouter = createTRPCRouter({
       return { icalContent };
     }),
 });
-
