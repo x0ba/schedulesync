@@ -93,12 +93,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
     // Handle one-time events differently
     if (event.isOneTime && event.date) {
       // Parse the specific date for one-time events with validation
-      let date: Date;
-      try {
-        date = parse(event.date, "yyyy-MM-dd", new Date());
-      } catch (e) {
-        throw new Error(`Invalid date format: ${event.date}`);
-      }
+      const date = parse(event.date, "yyyy-MM-dd", new Date());
 
       // Validate date validity
       if (isNaN(date.getTime())) {
