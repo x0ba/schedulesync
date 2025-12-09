@@ -97,7 +97,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
 
       // Validate date validity
       if (isNaN(date.getTime())) {
-        throw new Error(`Invalid date values: ${event.date}`);
+        throw new Error(`Invalid date format: ${event.date}`);
       }
 
       // Validate and parse startTime
