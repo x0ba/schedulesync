@@ -101,7 +101,8 @@ export function UploadZone() {
 
   const handleDownloadIcal = useCallback(() => {
     if (!events) return;
-    generateIcal.mutate({ events });
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    generateIcal.mutate({ events, timezone });
   }, [events, generateIcal]);
 
   return (

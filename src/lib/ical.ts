@@ -32,9 +32,17 @@ function getNextOccurrence(dayOfWeek: string, time: string): Date {
   }
 
   const [hours, minutes] = time.split(":").map(Number);
+  if (
+    hours === undefined ||
+    minutes === undefined ||
+    isNaN(hours) ||
+    isNaN(minutes)
+  ) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
   const targetDate = new Date(now);
   targetDate.setDate(now.getDate() + daysUntilTarget);
-  targetDate.setHours(hours!, minutes!, 0, 0);
+  targetDate.setHours(hours, minutes, 0, 0);
 
   return targetDate;
 }
@@ -44,6 +52,7 @@ export interface GenerateICalOptions {
   calendarName?: string;
   semesterEndDate?: Date;
   repeatWeeks?: number;
+  timezone?: string;
 }
 
 export function generateICalFile(options: GenerateICalOptions): string {
@@ -52,9 +61,13 @@ export function generateICalFile(options: GenerateICalOptions): string {
     calendarName = "Class Schedule",
     semesterEndDate,
     repeatWeeks = 16,
+    timezone,
   } = options;
 
-  const calendar = ical({ name: calendarName });
+  const calendar = ical({
+    name: calendarName,
+    timezone: timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
 
   // Calculate default end date (repeatWeeks from now)
   const defaultEndDate = new Date();
@@ -73,18 +86,34 @@ export function generateICalFile(options: GenerateICalOptions): string {
         throw new Error(`Invalid date format: ${event.date}`);
       }
       const [year, month, day] = dateParts.map(Number);
-      if (!year || !month || !day || isNaN(year) || isNaN(month) || isNaN(day)) {
+      if (
+        !year ||
+        !month ||
+        !day ||
+        isNaN(year) ||
+        isNaN(month) ||
+        isNaN(day)
+      ) {
         throw new Error(`Invalid date values: ${event.date}`);
       }
 
       // Validate and parse startTime
       const startTimeParts = event.startTime.split(":");
       if (startTimeParts.length !== 2) {
-        throw new Error(`Invalid time format for startTime: ${event.startTime}`);
+        throw new Error(
+          `Invalid time format for startTime: ${event.startTime}`,
+        );
       }
       const [startHours, startMinutes] = startTimeParts.map(Number);
-      if (isNaN(startHours) || isNaN(startMinutes)) {
-        throw new Error(`Invalid time values for startTime: ${event.startTime}`);
+      if (
+        startHours === undefined ||
+        startMinutes === undefined ||
+        isNaN(startHours) ||
+        isNaN(startMinutes)
+      ) {
+        throw new Error(
+          `Invalid time values for startTime: ${event.startTime}`,
+        );
       }
 
       // Validate and parse endTime
@@ -93,7 +122,12 @@ export function generateICalFile(options: GenerateICalOptions): string {
         throw new Error(`Invalid time format for endTime: ${event.endTime}`);
       }
       const [endHours, endMinutes] = endTimeParts.map(Number);
-      if (isNaN(endHours) || isNaN(endMinutes)) {
+      if (
+        endHours === undefined ||
+        endMinutes === undefined ||
+        isNaN(endHours) ||
+        isNaN(endMinutes)
+      ) {
         throw new Error(`Invalid time values for endTime: ${event.endTime}`);
       }
       startDate = new Date(year, month - 1, day, startHours, startMinutes);
@@ -125,9 +159,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
         summary: event.title,
         location: event.location,
         description:
-          descriptionParts.length > 0
-            ? descriptionParts.join("\n")
-            : undefined,
+          descriptionParts.length > 0 ? descriptionParts.join("\n") : undefined,
       });
     } else {
       calendar.createEvent({
@@ -136,9 +168,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
         summary: event.title,
         location: event.location,
         description:
-          descriptionParts.length > 0
-            ? descriptionParts.join("\n")
-            : undefined,
+          descriptionParts.length > 0 ? descriptionParts.join("\n") : undefined,
         repeating: {
           freq: ICalEventRepeatingFreq.WEEKLY,
           byDay: [dayToICalDay[event.dayOfWeek]!],
@@ -155,4 +185,3 @@ export function generateICalBlob(options: GenerateICalOptions): Blob {
   const icalString = generateICalFile(options);
   return new Blob([icalString], { type: "text/calendar;charset=utf-8" });
 }
-
