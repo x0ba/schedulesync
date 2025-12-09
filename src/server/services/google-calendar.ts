@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import type { ScheduleEvent } from "./schedule-analyzer";
-import { parse, addWeeks, format } from "date-fns";
+import { parse, addWeeks } from "date-fns";
 
 /**
  * Creates a new Google Calendar
@@ -10,7 +10,7 @@ export async function createCalendar(
   calendarName: string,
 ): Promise<string> {
   const calendar = google.calendar({ version: "v3" });
-  
+
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
@@ -43,15 +43,19 @@ export async function addEventsToCalendar(
   } = {},
 ): Promise<void> {
   const calendar = google.calendar({ version: "v3" });
-  
+
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
-  const { repeatWeeks = 16, timezone = "UTC", startDate = new Date() } = options;
+  const {
+    repeatWeeks = 16,
+    timezone = "UTC",
+    startDate = new Date(),
+  } = options;
 
   // Process all events in parallel for better performance
   await Promise.all(
-    events.map(event =>
+    events.map((event) =>
       event.isOneTime && event.date
         ? createOneTimeEvent(calendar, auth, calendarId, event, timezone)
         : createRecurringEvent(
@@ -62,8 +66,8 @@ export async function addEventsToCalendar(
             timezone,
             startDate,
             repeatWeeks,
-          )
-    )
+          ),
+    ),
   );
 }
 
@@ -72,7 +76,7 @@ export async function addEventsToCalendar(
  */
 async function createOneTimeEvent(
   calendar: ReturnType<typeof google.calendar>,
-  auth: google.auth.OAuth2,
+  auth: InstanceType<typeof google.auth.OAuth2>,
   calendarId: string,
   event: ScheduleEvent,
   timezone: string,
@@ -107,7 +111,7 @@ async function createOneTimeEvent(
  */
 async function createRecurringEvent(
   calendar: ReturnType<typeof google.calendar>,
-  auth: any,
+  auth: InstanceType<typeof google.auth.OAuth2>,
   calendarId: string,
   event: ScheduleEvent,
   timezone: string,
@@ -143,7 +147,11 @@ async function createRecurringEvent(
 
   // Create RRULE for weekly recurrence
   // Format lastOccurrence as UTC for RRULE UNTIL (RFC 5545 requires UTC if 'Z' is present)
-  const untilUtc = lastOccurrence.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').slice(0, 16);
+  const untilUtc = lastOccurrence
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z")
+    .slice(0, 16);
   const rrule = `RRULE:FREQ=WEEKLY;UNTIL=${untilUtc}`;
 
   await calendar.events.insert({
@@ -186,4 +194,3 @@ function buildEventDescription(event: ScheduleEvent): string {
 
   return parts.join("\n");
 }
-

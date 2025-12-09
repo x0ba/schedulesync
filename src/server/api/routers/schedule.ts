@@ -1,11 +1,18 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  publicProcedure,
+  protectedProcedure,
+} from "@/server/api/trpc";
 import {
   analyzeScheduleImage,
   scheduleEventSchema,
 } from "@/server/services/schedule-analyzer";
 import { generateICalFile } from "@/lib/ical";
-import { createCalendar, addEventsToCalendar } from "@/server/services/google-calendar";
+import {
+  createCalendar,
+  addEventsToCalendar,
+} from "@/server/services/google-calendar";
 import { clerkClient } from "@clerk/nextjs/server";
 
 const eventsInputSchema = z.array(scheduleEventSchema);
@@ -75,7 +82,10 @@ export const scheduleRouter = createTRPCRouter({
         }
 
         // Create a new calendar
-        const calendarId = await createCalendar(accessToken, input.calendarName);
+        const calendarId = await createCalendar(
+          accessToken,
+          input.calendarName,
+        );
 
         // Add events to the calendar
         await addEventsToCalendar(accessToken, calendarId, input.events, {

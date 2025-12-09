@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,7 +81,7 @@ export function UploadZone() {
       const file = e.dataTransfer.files[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -98,7 +99,7 @@ export function UploadZone() {
       const file = e.target.files?.[0];
       if (file) handleFile(file);
     },
-    [handleFile]
+    [handleFile],
   );
 
   const clearPreview = useCallback(() => {
@@ -136,16 +137,19 @@ export function UploadZone() {
           "relative overflow-hidden border-2 border-dashed transition-all duration-300",
           isDragging
             ? "border-orange-500 bg-orange-50/50 shadow-lg shadow-orange-500/10"
-            : "border-border hover:border-orange-400/50 hover:shadow-md"
+            : "border-border hover:border-orange-400/50 hover:shadow-md",
         )}
       >
         <CardContent className="p-0">
           {preview ? (
             <div className="relative">
-              <img
+              <Image
                 src={preview}
                 alt="Schedule preview"
                 className="max-h-80 w-full object-contain"
+                width={800}
+                height={320}
+                unoptimized
               />
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/60 to-transparent p-4 pt-8">
                 <span className="truncate text-sm font-medium text-white">
@@ -174,7 +178,7 @@ export function UploadZone() {
                   "flex size-16 items-center justify-center rounded-2xl transition-all duration-300",
                   isDragging
                     ? "scale-110 bg-orange-500 text-white shadow-lg shadow-orange-500/30"
-                    : "bg-gradient-to-br from-amber-100 to-orange-100 text-orange-600"
+                    : "bg-gradient-to-br from-amber-100 to-orange-100 text-orange-600",
                 )}
               >
                 {isDragging ? (
@@ -185,20 +189,20 @@ export function UploadZone() {
               </div>
 
               <div className="text-center">
-                <p className="text-base font-medium text-foreground">
+                <p className="text-foreground text-base font-medium">
                   {isDragging
                     ? "Drop your screenshot here"
                     : "Drop your schedule screenshot"}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-1 text-sm">
                   or click to browse from your device
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
-                <span className="rounded-full bg-muted px-2 py-0.5">PNG</span>
-                <span className="rounded-full bg-muted px-2 py-0.5">JPG</span>
-                <span className="rounded-full bg-muted px-2 py-0.5">WebP</span>
+              <div className="text-muted-foreground/70 flex items-center gap-2 text-xs">
+                <span className="bg-muted rounded-full px-2 py-0.5">PNG</span>
+                <span className="bg-muted rounded-full px-2 py-0.5">JPG</span>
+                <span className="bg-muted rounded-full px-2 py-0.5">WebP</span>
               </div>
 
               <input
@@ -265,7 +269,7 @@ export function UploadZone() {
                     "rounded-lg border p-3 text-sm transition-colors",
                     event.isOneTime
                       ? "border-blue-100 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20"
-                      : "border-transparent bg-muted/30",
+                      : "bg-muted/30 border-transparent",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -276,7 +280,7 @@ export function UploadZone() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="size-3.5" />
                       {event.isOneTime && event.date ? (

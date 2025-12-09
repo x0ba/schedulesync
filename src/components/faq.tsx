@@ -47,10 +47,10 @@ export function FAQ() {
   return (
     <section className="mt-20 w-full">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+        <h2 className="text-foreground text-2xl font-semibold tracking-tight">
           Frequently Asked Questions
         </h2>
-        <p className="mt-2 text-muted-foreground">
+        <p className="text-muted-foreground mt-2">
           Everything you need to know about converting your schedule.
         </p>
       </div>
@@ -68,4 +68,3 @@ export function FAQ() {
     </section>
   );
 }
-

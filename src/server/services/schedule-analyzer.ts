@@ -63,8 +63,9 @@ export async function analyzeScheduleImage(
   base64Image: string,
 ): Promise<Schedule> {
   // Validate input: check data URL format and restrict MIME types
-  const dataUrlRegex = /^data:(image\/png|image\/jpeg|image\/webp|image\/gif);base64,([A-Za-z0-9+/=]+)$/;
-  const matches = base64Image.match(dataUrlRegex);
+  const dataUrlRegex =
+    /^data:(image\/png|image\/jpeg|image\/webp|image\/gif);base64,([A-Za-z0-9+/=]+)$/;
+  const matches = dataUrlRegex.exec(base64Image);
 
   let imageData: { type: "image"; image: URL | Uint8Array; mimeType?: string };
 
@@ -78,14 +79,16 @@ export async function analyzeScheduleImage(
       | "image/gif";
     const base64Data = matches[2]!;
     // Calculate decoded size
-    const decodedSize = Math.floor(base64Data.length * 3 / 4) - (base64Data.endsWith('==') ? 2 : base64Data.endsWith('=') ? 1 : 0);
+    const decodedSize =
+      Math.floor((base64Data.length * 3) / 4) -
+      (base64Data.endsWith("==") ? 2 : base64Data.endsWith("=") ? 1 : 0);
     if (decodedSize > MAX_IMAGE_SIZE) {
       throw new Error("Image size exceeds maximum allowed size of 5MB.");
     }
     let binaryString: string;
     try {
       binaryString = atob(base64Data);
-    } catch (e) {
+    } catch {
       throw new Error("Invalid base64 image data.");
     }
     const bytes = new Uint8Array(binaryString.length);
