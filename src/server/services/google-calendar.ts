@@ -74,7 +74,7 @@ export async function addEventsToCalendar(
  */
 async function createOneTimeEvent(
   calendar: ReturnType<typeof google.calendar>,
-  auth: any,
+  auth: google.auth.OAuth2,
   calendarId: string,
   event: ScheduleEvent,
   timezone: string,
