@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { PostHogProvider } from "./providers";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "ScheduleSync",
@@ -56,6 +57,7 @@ export default function RootLayout({
         <html lang="en" className={`${inter.variable}`}>
           <body>
             <TRPCReactProvider>{children}</TRPCReactProvider>
+            <Footer />
           </body>
         </html>
       </PostHogProvider>
