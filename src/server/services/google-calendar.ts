@@ -49,24 +49,22 @@ export async function addEventsToCalendar(
 
   const { repeatWeeks = 16, timezone = "UTC", startDate = new Date() } = options;
 
-  // Process each event
-  for (const event of events) {
-    if (event.isOneTime && event.date) {
-      // One-time event with a specific date
-      await createOneTimeEvent(calendar, auth, calendarId, event, timezone);
-    } else {
-      // Recurring event
-      await createRecurringEvent(
-        calendar,
-        auth,
-        calendarId,
-        event,
-        timezone,
-        startDate,
-        repeatWeeks,
-      );
-    }
-  }
+  // Process all events in parallel for better performance
+  await Promise.all(
+    events.map(event =>
+      event.isOneTime && event.date
+        ? createOneTimeEvent(calendar, auth, calendarId, event, timezone)
+        : createRecurringEvent(
+            calendar,
+            auth,
+            calendarId,
+            event,
+            timezone,
+            startDate,
+            repeatWeeks,
+          )
+    )
+  );
 }
 
 /**
