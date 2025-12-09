@@ -35,6 +35,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.41.0",
+    "googleapis": "^167.0.0",
     "ical-generator": "^10.0.0",
     "lucide-react": "^0.556.0",
     "next": "^15.2.3",
