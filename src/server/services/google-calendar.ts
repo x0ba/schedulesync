@@ -144,7 +144,9 @@ async function createRecurringEvent(
   const lastOccurrence = addWeeks(firstOccurrence, repeatWeeks);
 
   // Create RRULE for weekly recurrence
-  const rrule = `RRULE:FREQ=WEEKLY;UNTIL=${format(lastOccurrence, "yyyyMMdd'T'HHmmss'Z'")}`;
+  // Format lastOccurrence as UTC for RRULE UNTIL (RFC 5545 requires UTC if 'Z' is present)
+  const untilUtc = lastOccurrence.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').slice(0, 16);
+  const rrule = `RRULE:FREQ=WEEKLY;UNTIL=${untilUtc}`;
 
   await calendar.events.insert({
     auth,
