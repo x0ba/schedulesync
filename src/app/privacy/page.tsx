@@ -1,9 +1,28 @@
 import { Header } from "@/components/header";
 import { type Metadata } from "next";
 
+function getBaseUrl() {
+  if (typeof window !== "undefined") return window.location.origin;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NEXT_PUBLIC_URL) return process.env.NEXT_PUBLIC_URL;
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
+const baseUrl = getBaseUrl();
+
 export const metadata: Metadata = {
-  title: "Privacy Policy | ScheduleSync",
-  description: "Privacy Policy for ScheduleSync",
+  title: "Privacy Policy",
+  description:
+    "ScheduleSync Privacy Policy - Learn how we protect your data and privacy when using our course schedule to calendar conversion tool.",
+  alternates: {
+    canonical: `${baseUrl}/privacy`,
+  },
+  openGraph: {
+    title: "Privacy Policy | ScheduleSync",
+    description:
+      "ScheduleSync Privacy Policy - Learn how we protect your data and privacy when using our course schedule to calendar conversion tool.",
+    url: `${baseUrl}/privacy`,
+  },
 };
 
 export default function PrivacyPolicy() {
