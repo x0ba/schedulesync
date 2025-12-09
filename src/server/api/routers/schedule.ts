@@ -85,7 +85,7 @@ export const scheduleRouter = createTRPCRouter({
         });
 
         // Return the calendar URL
-        const calendarUrl = `https://calendar.google.com/calendar/r?cid=${calendarId}`;
+        const calendarUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(calendarId)}`;
 
         return {
           success: true,
