@@ -1,5 +1,15 @@
 import ical, { ICalEventRepeatingFreq, ICalWeekday } from "ical-generator";
 import type { ScheduleEvent } from "@/server/services/schedule-analyzer";
+import {
+  addDays,
+  addWeeks,
+  getDay,
+  parse,
+  setHours,
+  setMinutes,
+  setSeconds,
+  setMilliseconds,
+} from "date-fns";
 
 const dayToICalDay: Record<string, ICalWeekday> = {
   Monday: ICalWeekday.MO,
@@ -24,7 +34,7 @@ const dayToOffset: Record<string, number> = {
 function getNextOccurrence(dayOfWeek: string, time: string): Date {
   const now = new Date();
   const targetDay = dayToOffset[dayOfWeek]!;
-  const currentDay = now.getDay();
+  const currentDay = getDay(now);
 
   let daysUntilTarget = targetDay - currentDay;
   if (daysUntilTarget <= 0) {
@@ -40,9 +50,12 @@ function getNextOccurrence(dayOfWeek: string, time: string): Date {
   ) {
     throw new Error(`Invalid time format: ${time}`);
   }
-  const targetDate = new Date(now);
-  targetDate.setDate(now.getDate() + daysUntilTarget);
-  targetDate.setHours(hours, minutes, 0, 0);
+
+  let targetDate = addDays(now, daysUntilTarget);
+  targetDate = setHours(targetDate, hours);
+  targetDate = setMinutes(targetDate, minutes);
+  targetDate = setSeconds(targetDate, 0);
+  targetDate = setMilliseconds(targetDate, 0);
 
   return targetDate;
 }
@@ -70,8 +83,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
   });
 
   // Calculate default end date (repeatWeeks from now)
-  const defaultEndDate = new Date();
-  defaultEndDate.setDate(defaultEndDate.getDate() + repeatWeeks * 7);
+  const defaultEndDate = addWeeks(new Date(), repeatWeeks);
   const untilDate = semesterEndDate ?? defaultEndDate;
 
   for (const event of events) {
@@ -81,19 +93,15 @@ export function generateICalFile(options: GenerateICalOptions): string {
     // Handle one-time events differently
     if (event.isOneTime && event.date) {
       // Parse the specific date for one-time events with validation
-      const dateParts = event.date.split("-");
-      if (dateParts.length !== 3) {
+      let date: Date;
+      try {
+        date = parse(event.date, "yyyy-MM-dd", new Date());
+      } catch (e) {
         throw new Error(`Invalid date format: ${event.date}`);
       }
-      const [year, month, day] = dateParts.map(Number);
-      if (
-        !year ||
-        !month ||
-        !day ||
-        isNaN(year) ||
-        isNaN(month) ||
-        isNaN(day)
-      ) {
+
+      // Validate date validity
+      if (isNaN(date.getTime())) {
         throw new Error(`Invalid date values: ${event.date}`);
       }
 
@@ -130,8 +138,9 @@ export function generateICalFile(options: GenerateICalOptions): string {
       ) {
         throw new Error(`Invalid time values for endTime: ${event.endTime}`);
       }
-      startDate = new Date(year, month - 1, day, startHours, startMinutes);
-      endDate = new Date(year, month - 1, day, endHours, endMinutes);
+
+      startDate = setHours(setMinutes(date, startMinutes), startHours);
+      endDate = setHours(setMinutes(date, endMinutes), endHours);
     } else if (event.isOneTime) {
       // One-time event without a specific date - use next occurrence of that day
       if (!event.dayOfWeek) {

@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { ScheduleEvent } from "@/server/services/schedule-analyzer";
+import { format, parse } from "date-fns";
 
 export function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -259,15 +260,15 @@ export function UploadZone() {
                         <span>
                           {(() => {
                             try {
-                              const formattedDate = new Date(event.date + "T12:00:00");
-                              if (isNaN(formattedDate.getTime())) {
+                              const parsedDate = parse(
+                                event.date,
+                                "yyyy-MM-dd",
+                                new Date(),
+                              );
+                              if (isNaN(parsedDate.getTime())) {
                                 return "Invalid date";
                               }
-                              return formattedDate.toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              });
+                              return format(parsedDate, "MMM d, yyyy");
                             } catch {
                               return event.date; // Fallback to raw string
                             }
