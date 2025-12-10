@@ -1,5 +1,6 @@
 import { Header } from "@/components/header";
 import { type Metadata } from "next";
+import Link from "next/link";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return window.location.origin;
@@ -169,7 +170,7 @@ export default function PrivacyPolicy() {
               </h2>
               <p className="leading-7">
                 If you have any questions about this Privacy Policy, please
-                contact the dev at danielxu0307@gmail.com.
+                contact the dev <Link href="mailto:hi@danielx.me">here</Link>.
               </p>
             </section>
           </div>
