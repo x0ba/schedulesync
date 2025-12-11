@@ -75,7 +75,7 @@ export function UploadZone() {
       // Remove the redirect flag after restoring
       sessionStorage.removeItem("schedulesync_oauth_redirect");
     }
-  }, [isSignedIn, preview, fileName, events]);
+  }, [isSignedIn]);
 
   // Save state to sessionStorage before OAuth redirect
   const saveStateForSignIn = useCallback(() => {
