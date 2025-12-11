@@ -82,10 +82,26 @@ export function UploadZone() {
     // Set OAuth redirect flag
     sessionStorage.setItem("schedulesync_oauth_redirect", "true");
     if (preview) {
-      try {
-        sessionStorage.setItem(STORAGE_KEYS.preview, preview);
-      } catch (e) {
-        console.error("Failed to save preview to sessionStorage:", e);
+      // Check size before saving (limit to 4MB for safety)
+      const previewSizeBytes = preview.length * 0.75; // base64 overhead: 4/3, so 0.75 to get bytes
+      const maxPreviewSize = 4 * 1024 * 1024; // 4MB
+      if (previewSizeBytes > maxPreviewSize) {
+        console.warn("Preview image is too large to save in sessionStorage (exceeds 4MB). Skipping save.");
+      } else {
+        try {
+          sessionStorage.setItem(STORAGE_KEYS.preview, preview);
+        } catch (e) {
+          if (
+            e &&
+            typeof e === "object" &&
+            "name" in e &&
+            (e as any).name === "QuotaExceededError"
+          ) {
+            console.error("Failed to save preview: sessionStorage quota exceeded.");
+          } else {
+            console.error("Failed to save preview to sessionStorage:", e);
+          }
+        }
       }
     }
     if (fileName) {
