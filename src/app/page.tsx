@@ -2,6 +2,7 @@ import { Header } from "@/components/header";
 import { UploadZone } from "@/components/upload-zone";
 import { FAQ } from "@/components/faq";
 import { type Metadata } from "next";
+import Link from "next/link";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") return window.location.origin;
@@ -79,7 +80,10 @@ export default function Home() {
             </h1>
             <p className="text-muted-foreground mx-auto mt-4 max-w-md text-lg">
               Upload a screenshot of your course schedule and we&apos;ll
-              generate calendar files you can import anywhere.
+              generate calendar files you can import anywhere.{" "}
+              <Link href="/privacy" className="text-orange-600 hover:underline">
+                Private by default.
+              </Link>
             </p>
           </div>
 
