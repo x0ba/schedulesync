@@ -75,6 +75,9 @@ export function UploadZone() {
       // Remove the redirect flag after restoring
       sessionStorage.removeItem("schedulesync_oauth_redirect");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionally only depend on isSignedIn. We check preview/fileName/events for null
+    // to determine if restoration is needed, but don't want to re-run when they change.
   }, [isSignedIn]);
 
   // Save state to sessionStorage before OAuth redirect
@@ -86,18 +89,17 @@ export function UploadZone() {
       const previewSizeBytes = preview.length * 0.75; // base64 overhead: 4/3, so 0.75 to get bytes
       const maxPreviewSize = 4 * 1024 * 1024; // 4MB
       if (previewSizeBytes > maxPreviewSize) {
-        console.warn("Preview image is too large to save in sessionStorage (exceeds 4MB). Skipping save.");
+        console.warn(
+          "Preview image is too large to save in sessionStorage (exceeds 4MB). Skipping save.",
+        );
       } else {
         try {
           sessionStorage.setItem(STORAGE_KEYS.preview, preview);
         } catch (e) {
-          if (
-            e &&
-            typeof e === "object" &&
-            "name" in e &&
-            (e as any).name === "QuotaExceededError"
-          ) {
-            console.error("Failed to save preview: sessionStorage quota exceeded.");
+          if (e instanceof DOMException && e.name === "QuotaExceededError") {
+            console.error(
+              "Failed to save preview: sessionStorage quota exceeded.",
+            );
           } else {
             console.error("Failed to save preview to sessionStorage:", e);
           }
