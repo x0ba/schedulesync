@@ -75,9 +75,9 @@ export function UploadZone() {
       // Remove the redirect flag after restoring
       sessionStorage.removeItem("schedulesync_oauth_redirect");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     // Intentionally only depend on isSignedIn. We check preview/fileName/events for null
     // to determine if restoration is needed, but don't want to re-run when they change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
   // Save state to sessionStorage before OAuth redirect
@@ -324,7 +324,7 @@ export function UploadZone() {
           {analyzeSchedule.isPending ? (
             <>
               <Loader2 className="size-5 animate-spin" />
-              Analyzing schedule...
+              Analyzing schedule... Don&apos;t close the page.
             </>
           ) : (
             <>

@@ -3,11 +3,26 @@ import type { ScheduleEvent } from "./schedule-analyzer";
 import { parse, addWeeks } from "date-fns";
 
 /**
+ * Formats a Date as a local datetime string without timezone suffix.
+ * Google Calendar will interpret this time using the provided timeZone parameter.
+ */
+function formatDateTimeLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+}
+
+/**
  * Creates a new Google Calendar
  */
 export async function createCalendar(
   accessToken: string,
   calendarName: string,
+  timezone = "UTC",
 ): Promise<string> {
   const calendar = google.calendar({ version: "v3" });
 
@@ -18,7 +33,7 @@ export async function createCalendar(
     auth,
     requestBody: {
       summary: calendarName,
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: timezone,
     },
   });
 
@@ -95,11 +110,11 @@ async function createOneTimeEvent(
       location: event.location,
       description: buildEventDescription(event),
       start: {
-        dateTime: startDateTime.toISOString(),
+        dateTime: formatDateTimeLocal(startDateTime),
         timeZone: timezone,
       },
       end: {
-        dateTime: endDateTime.toISOString(),
+        dateTime: formatDateTimeLocal(endDateTime),
         timeZone: timezone,
       },
     },
@@ -162,11 +177,11 @@ async function createRecurringEvent(
       location: event.location,
       description: buildEventDescription(event),
       start: {
-        dateTime: startDateTime.toISOString(),
+        dateTime: formatDateTimeLocal(startDateTime),
         timeZone: timezone,
       },
       end: {
-        dateTime: endDateTime.toISOString(),
+        dateTime: formatDateTimeLocal(endDateTime),
         timeZone: timezone,
       },
       recurrence: [rrule],
