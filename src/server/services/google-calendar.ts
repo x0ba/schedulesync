@@ -1,15 +1,19 @@
 import { google } from "googleapis";
 import type { ScheduleEvent } from "./schedule-analyzer";
 import { parse, addWeeks } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
 
 /**
- * Formats a Date as a datetime string in the specified timezone, without timezone suffix.
+ * Formats a Date as a local datetime string without timezone suffix.
  * Google Calendar will interpret this time using the provided timeZone parameter.
  */
-function formatDateTimeLocal(date: Date, timeZone: string): string {
-  // Format as 'yyyy-MM-dd\'T\'HH:mm:ss' in the target timezone
-  return formatInTimeZone(date, timeZone, "yyyy-MM-dd'T'HH:mm:ss");
+function formatDateTimeLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
 /**
