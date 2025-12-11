@@ -82,15 +82,17 @@ export const scheduleRouter = createTRPCRouter({
         }
 
         // Create a new calendar
+        const timezone = input.timezone ?? "UTC";
         const calendarId = await createCalendar(
           accessToken,
           input.calendarName,
+          timezone,
         );
 
         // Add events to the calendar
         await addEventsToCalendar(accessToken, calendarId, input.events, {
           repeatWeeks: input.repeatWeeks,
-          timezone: input.timezone ?? "UTC",
+          timezone,
           startDate: input.startDate,
         });
 
