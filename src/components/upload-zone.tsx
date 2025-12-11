@@ -39,32 +39,47 @@ export function UploadZone() {
 
   const { isSignedIn } = useAuth();
 
-  // Restore state from sessionStorage on mount (after OAuth redirect)
+  // Restore state from sessionStorage only after OAuth redirect
   useEffect(() => {
-    const savedPreview = sessionStorage.getItem(STORAGE_KEYS.preview);
-    const savedFileName = sessionStorage.getItem(STORAGE_KEYS.fileName);
-    const savedEvents = sessionStorage.getItem(STORAGE_KEYS.events);
+    // Check for OAuth redirect flag in sessionStorage
+    const oauthRedirect = sessionStorage.getItem("schedulesync_oauth_redirect");
+    // Only restore if user is signed in, redirect flag is set, and state is not already set
+    if (
+      isSignedIn &&
+      oauthRedirect === "true" &&
+      preview === null &&
+      fileName === null &&
+      events === null
+    ) {
+      const savedPreview = sessionStorage.getItem(STORAGE_KEYS.preview);
+      const savedFileName = sessionStorage.getItem(STORAGE_KEYS.fileName);
+      const savedEvents = sessionStorage.getItem(STORAGE_KEYS.events);
 
-    if (savedPreview) {
-      setPreview(savedPreview);
-      sessionStorage.removeItem(STORAGE_KEYS.preview);
-    }
-    if (savedFileName) {
-      setFileName(savedFileName);
-      sessionStorage.removeItem(STORAGE_KEYS.fileName);
-    }
-    if (savedEvents) {
-      try {
-        setEvents(JSON.parse(savedEvents) as ScheduleEvent[]);
-      } catch {
-        // Ignore parse errors
+      if (savedPreview) {
+        setPreview(savedPreview);
+        sessionStorage.removeItem(STORAGE_KEYS.preview);
       }
-      sessionStorage.removeItem(STORAGE_KEYS.events);
+      if (savedFileName) {
+        setFileName(savedFileName);
+        sessionStorage.removeItem(STORAGE_KEYS.fileName);
+      }
+      if (savedEvents) {
+        try {
+          setEvents(JSON.parse(savedEvents) as ScheduleEvent[]);
+        } catch {
+          // Ignore parse errors
+        }
+        sessionStorage.removeItem(STORAGE_KEYS.events);
+      }
+      // Remove the redirect flag after restoring
+      sessionStorage.removeItem("schedulesync_oauth_redirect");
     }
-  }, []);
+  }, [isSignedIn, preview, fileName, events]);
 
   // Save state to sessionStorage before OAuth redirect
   const saveStateForSignIn = useCallback(() => {
+    // Set OAuth redirect flag
+    sessionStorage.setItem("schedulesync_oauth_redirect", "true");
     if (preview) {
       try {
         sessionStorage.setItem(STORAGE_KEYS.preview, preview);
