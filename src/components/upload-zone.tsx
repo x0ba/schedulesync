@@ -66,13 +66,25 @@ export function UploadZone() {
   // Save state to sessionStorage before OAuth redirect
   const saveStateForSignIn = useCallback(() => {
     if (preview) {
-      sessionStorage.setItem(STORAGE_KEYS.preview, preview);
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.preview, preview);
+      } catch (e) {
+        console.error("Failed to save preview to sessionStorage:", e);
+      }
     }
     if (fileName) {
-      sessionStorage.setItem(STORAGE_KEYS.fileName, fileName);
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.fileName, fileName);
+      } catch (e) {
+        console.error("Failed to save fileName to sessionStorage:", e);
+      }
     }
     if (events) {
-      sessionStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+      try {
+        sessionStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+      } catch (e) {
+        console.error("Failed to save events to sessionStorage:", e);
+      }
     }
   }, [preview, fileName, events]);
 
