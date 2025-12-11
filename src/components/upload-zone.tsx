@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { ScheduleEvent } from "@/server/services/schedule-analyzer";
 import { format, parse } from "date-fns";
-import { useAuth, SignInButton } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 // Storage keys for persisting state across OAuth redirect
 const STORAGE_KEYS = {
@@ -38,6 +38,7 @@ export function UploadZone() {
   const [calendarUrl, setCalendarUrl] = useState<string | null>(null);
 
   const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
 
   // Restore state from sessionStorage only after OAuth redirect
   useEffect(() => {
@@ -102,6 +103,12 @@ export function UploadZone() {
       }
     }
   }, [preview, fileName, events]);
+
+  // Combined handler that saves state first, then opens sign-in modal
+  const handleSignInClick = useCallback(() => {
+    saveStateForSignIn();
+    openSignIn();
+  }, [saveStateForSignIn, openSignIn]);
 
   const analyzeSchedule = api.schedule.analyzeSchedule.useMutation({
     onSuccess: (data) => {
@@ -442,16 +449,14 @@ export function UploadZone() {
                       Sign in with your Google account to sync events
                     </p>
                   </div>
-                  <SignInButton mode="modal">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5"
-                      onClick={saveStateForSignIn}
-                    >
-                      Sign in
-                    </Button>
-                  </SignInButton>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={handleSignInClick}
+                  >
+                    Sign in
+                  </Button>
                 </div>
               </CardContent>
             </Card>
