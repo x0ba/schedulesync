@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,14 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { ScheduleEvent } from "@/server/services/schedule-analyzer";
 import { format, parse } from "date-fns";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, SignInButton } from "@clerk/nextjs";
+
+// Storage keys for persisting state across OAuth redirect
+const STORAGE_KEYS = {
+  preview: "schedulesync_preview",
+  fileName: "schedulesync_fileName",
+  events: "schedulesync_events",
+} as const;
 
 export function UploadZone() {
   const [isDragging, setIsDragging] = useState(false);
@@ -31,6 +38,43 @@ export function UploadZone() {
   const [calendarUrl, setCalendarUrl] = useState<string | null>(null);
 
   const { isSignedIn } = useAuth();
+
+  // Restore state from sessionStorage on mount (after OAuth redirect)
+  useEffect(() => {
+    const savedPreview = sessionStorage.getItem(STORAGE_KEYS.preview);
+    const savedFileName = sessionStorage.getItem(STORAGE_KEYS.fileName);
+    const savedEvents = sessionStorage.getItem(STORAGE_KEYS.events);
+
+    if (savedPreview) {
+      setPreview(savedPreview);
+      sessionStorage.removeItem(STORAGE_KEYS.preview);
+    }
+    if (savedFileName) {
+      setFileName(savedFileName);
+      sessionStorage.removeItem(STORAGE_KEYS.fileName);
+    }
+    if (savedEvents) {
+      try {
+        setEvents(JSON.parse(savedEvents) as ScheduleEvent[]);
+      } catch {
+        // Ignore parse errors
+      }
+      sessionStorage.removeItem(STORAGE_KEYS.events);
+    }
+  }, []);
+
+  // Save state to sessionStorage before OAuth redirect
+  const saveStateForSignIn = useCallback(() => {
+    if (preview) {
+      sessionStorage.setItem(STORAGE_KEYS.preview, preview);
+    }
+    if (fileName) {
+      sessionStorage.setItem(STORAGE_KEYS.fileName, fileName);
+    }
+    if (events) {
+      sessionStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+    }
+  }, [preview, fileName, events]);
 
   const analyzeSchedule = api.schedule.analyzeSchedule.useMutation({
     onSuccess: (data) => {
@@ -340,7 +384,7 @@ export function UploadZone() {
             Download iCal
           </Button>
 
-          {isSignedIn && (
+          {isSignedIn ? (
             <Button
               onClick={handleSyncToGoogle}
               disabled={syncToGoogleCalendar.isPending}
@@ -358,6 +402,32 @@ export function UploadZone() {
                 </>
               )}
             </Button>
+          ) : (
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="size-5 text-blue-500" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">
+                      Want to add directly to Google Calendar?
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Sign in with your Google account to sync events
+                    </p>
+                  </div>
+                  <SignInButton mode="modal">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={saveStateForSignIn}
+                    >
+                      Sign in
+                    </Button>
+                  </SignInButton>
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Success message with calendar link */}
