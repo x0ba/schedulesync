@@ -31,13 +31,16 @@ const dayToOffset: Record<string, number> = {
   Saturday: 6,
 };
 
-function getNextOccurrence(dayOfWeek: string, time: string): Date {
-  const now = new Date();
+function getNextOccurrence(
+  dayOfWeek: string,
+  time: string,
+  fromDate: Date,
+): Date {
   const targetDay = dayToOffset[dayOfWeek]!;
-  const currentDay = getDay(now);
+  const currentDay = getDay(fromDate);
 
   let daysUntilTarget = targetDay - currentDay;
-  if (daysUntilTarget <= 0) {
+  if (daysUntilTarget < 0) {
     daysUntilTarget += 7;
   }
 
@@ -51,7 +54,7 @@ function getNextOccurrence(dayOfWeek: string, time: string): Date {
     throw new Error(`Invalid time format: ${time}`);
   }
 
-  let targetDate = addDays(now, daysUntilTarget);
+  let targetDate = addDays(fromDate, daysUntilTarget);
   targetDate = setHours(targetDate, hours);
   targetDate = setMinutes(targetDate, minutes);
   targetDate = setSeconds(targetDate, 0);
@@ -66,6 +69,7 @@ export interface GenerateICalOptions {
   semesterEndDate?: Date;
   repeatWeeks?: number;
   timezone?: string;
+  startDate: Date;
 }
 
 export function generateICalFile(options: GenerateICalOptions): string {
@@ -75,6 +79,7 @@ export function generateICalFile(options: GenerateICalOptions): string {
     semesterEndDate,
     repeatWeeks = 16,
     timezone,
+    startDate,
   } = options;
 
   const calendar = ical({
@@ -82,13 +87,13 @@ export function generateICalFile(options: GenerateICalOptions): string {
     timezone: timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
-  // Calculate default end date (repeatWeeks from now)
-  const defaultEndDate = addWeeks(new Date(), repeatWeeks);
+  // Calculate default end date (repeatWeeks from startDate)
+  const defaultEndDate = addWeeks(startDate, repeatWeeks);
   const untilDate = semesterEndDate ?? defaultEndDate;
 
   for (const event of events) {
-    let startDate: Date;
-    let endDate: Date;
+    let eventStartDate: Date;
+    let eventEndDate: Date;
 
     // Handle one-time events differently
     if (event.isOneTime && event.date) {
@@ -134,19 +139,35 @@ export function generateICalFile(options: GenerateICalOptions): string {
         throw new Error(`Invalid time values for endTime: ${event.endTime}`);
       }
 
-      startDate = setHours(setMinutes(date, startMinutes), startHours);
-      endDate = setHours(setMinutes(date, endMinutes), endHours);
+      eventStartDate = setHours(setMinutes(date, startMinutes), startHours);
+      eventEndDate = setHours(setMinutes(date, endMinutes), endHours);
     } else if (event.isOneTime) {
       // One-time event without a specific date - use next occurrence of that day
       if (!event.dayOfWeek) {
         throw new Error("One-time event without date must have dayOfWeek");
       }
-      startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
-      endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
+      eventStartDate = getNextOccurrence(
+        event.dayOfWeek,
+        event.startTime,
+        startDate,
+      );
+      eventEndDate = getNextOccurrence(
+        event.dayOfWeek,
+        event.endTime,
+        startDate,
+      );
     } else {
       // Regular recurring event
-      startDate = getNextOccurrence(event.dayOfWeek, event.startTime);
-      endDate = getNextOccurrence(event.dayOfWeek, event.endTime);
+      eventStartDate = getNextOccurrence(
+        event.dayOfWeek,
+        event.startTime,
+        startDate,
+      );
+      eventEndDate = getNextOccurrence(
+        event.dayOfWeek,
+        event.endTime,
+        startDate,
+      );
     }
 
     // Build description
@@ -158,8 +179,8 @@ export function generateICalFile(options: GenerateICalOptions): string {
     // Create event with or without recurrence based on event type
     if (event.isOneTime) {
       calendar.createEvent({
-        start: startDate,
-        end: endDate,
+        start: eventStartDate,
+        end: eventEndDate,
         summary: event.title,
         location: event.location,
         description:
@@ -167,8 +188,8 @@ export function generateICalFile(options: GenerateICalOptions): string {
       });
     } else {
       calendar.createEvent({
-        start: startDate,
-        end: endDate,
+        start: eventStartDate,
+        end: eventEndDate,
         summary: event.title,
         location: event.location,
         description:
