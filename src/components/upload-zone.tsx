@@ -455,7 +455,7 @@ export function UploadZone() {
           <CardContent className="p-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                When should your schedule start?{" "}
+                When does your quarter (or semester) start?{" "}
                 <span className="text-red-500">*</span>
               </label>
               <Popover>
