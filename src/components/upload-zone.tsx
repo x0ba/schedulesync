@@ -559,7 +559,7 @@ export function UploadZone() {
               {!endDate && (
                 <p className="text-muted-foreground text-xs">
                   Optional: If provided, recurring events will end on this date
-                  instead of the default 16 weeks
+                  instead of the default 16 weeks from the start date
                 </p>
               )}
             </div>
