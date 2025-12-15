@@ -55,6 +55,7 @@ export async function addEventsToCalendar(
     repeatWeeks?: number;
     timezone?: string;
     startDate?: Date;
+    endDate?: Date;
   } = {},
 ): Promise<void> {
   const calendar = google.calendar({ version: "v3" });
@@ -66,6 +67,7 @@ export async function addEventsToCalendar(
     repeatWeeks = 16,
     timezone = "UTC",
     startDate = new Date(),
+    endDate,
   } = options;
 
   // Process all events in parallel for better performance
@@ -81,6 +83,7 @@ export async function addEventsToCalendar(
             timezone,
             startDate,
             repeatWeeks,
+            endDate,
           ),
     ),
   );
@@ -132,6 +135,7 @@ async function createRecurringEvent(
   timezone: string,
   startDate: Date,
   repeatWeeks: number,
+  endDate?: Date,
 ) {
   // Find the next occurrence of this day of week
   const dayMap: Record<string, number> = {
@@ -158,7 +162,8 @@ async function createRecurringEvent(
   const endDateTime = parse(event.endTime, "HH:mm", firstOccurrence);
 
   // Calculate the last occurrence (until date)
-  const lastOccurrence = addWeeks(firstOccurrence, repeatWeeks);
+  // Use endDate if provided, otherwise calculate from repeatWeeks
+  const lastOccurrence = endDate ?? addWeeks(firstOccurrence, repeatWeeks);
 
   // Create RRULE for weekly recurrence
   // Format lastOccurrence as UTC for RRULE UNTIL (RFC 5545 requires UTC if 'Z' is present)
