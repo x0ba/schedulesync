@@ -27,7 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import type { ScheduleEvent } from "@/server/services/schedule-analyzer";
-import { format, parse } from "date-fns";
+import { format, parse, isBefore, startOfDay } from "date-fns";
 import { useAuth, useClerk } from "@clerk/nextjs";
 
 // Storage keys for persisting state across OAuth redirect
@@ -108,6 +108,17 @@ export function UploadZone() {
     // to determine if restoration is needed, but don't want to re-run when they change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
+
+  // Clear endDate if it becomes invalid (before startDate)
+  useEffect(() => {
+    if (
+      startDate &&
+      endDate &&
+      isBefore(startOfDay(endDate), startOfDay(startDate))
+    ) {
+      setEndDate(undefined);
+    }
+  }, [startDate, endDate]);
 
   // Save state to sessionStorage before OAuth redirect
   const saveStateForSignIn = useCallback(() => {
@@ -536,6 +547,12 @@ export function UploadZone() {
                     selected={endDate}
                     onSelect={setEndDate}
                     initialFocus
+                    disabled={
+                      startDate
+                        ? (date) =>
+                            isBefore(startOfDay(date), startOfDay(startDate))
+                        : undefined
+                    }
                   />
                 </PopoverContent>
               </Popover>
