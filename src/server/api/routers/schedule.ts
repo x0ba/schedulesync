@@ -38,6 +38,7 @@ export const scheduleRouter = createTRPCRouter({
         calendarName: z.string().optional(),
         repeatWeeks: z.number().optional().default(16),
         timezone: z.string().optional(),
+        startDate: z.date(),
       }),
     )
     .mutation(({ input }) => {
@@ -46,6 +47,7 @@ export const scheduleRouter = createTRPCRouter({
         calendarName: input.calendarName,
         repeatWeeks: input.repeatWeeks,
         timezone: input.timezone,
+        startDate: input.startDate,
       });
       return { icalContent };
     }),
@@ -58,7 +60,7 @@ export const scheduleRouter = createTRPCRouter({
         calendarName: z.string().default("My Schedule"),
         repeatWeeks: z.number().optional().default(16),
         timezone: z.string().optional(),
-        startDate: z.date().optional(),
+        startDate: z.date(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
