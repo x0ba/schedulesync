@@ -49,7 +49,7 @@ export const scheduleRouter = createTRPCRouter({
         repeatWeeks: input.repeatWeeks,
         timezone: input.timezone,
         startDate: input.startDate,
-        endDate: input.endDate,
+        semesterEndDate: input.endDate,
       });
       return { icalContent };
     }),
