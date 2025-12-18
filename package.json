@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "bun --bun next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "dev": "next dev --turbo",
+    "dev": "bun --bun next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "lint": "next lint",
@@ -26,8 +26,8 @@
     "**/*.{ts,tsx}": "bash -c 'tsc --noEmit'"
   },
   "dependencies": {
-    "@ai-sdk/google": "^2.0.44",
     "@clerk/nextjs": "^6.36.0",
+    "@openrouter/ai-sdk-provider": "^1.5.4",
     "@posthog/react": "^1.5.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-popover": "^1.1.15",

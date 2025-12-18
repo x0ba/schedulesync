@@ -1,7 +1,11 @@
-import { google } from "@ai-sdk/google";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { env } from "@/env";
 
+const openrouter = createOpenRouter({
+  apiKey: env.OPENROUTER_KEY,
+});
 // Schema for a single schedule event
 export const scheduleEventSchema = z.object({
   title: z.string().describe("The course name or event title"),
@@ -109,7 +113,7 @@ export async function analyzeScheduleImage(
   }
 
   const { object } = await generateObject({
-    model: google("gemini-2.5-flash"),
+    model: openrouter("google/gemini-3-flash-preview"),
     schema: scheduleSchema,
     messages: [
       {
