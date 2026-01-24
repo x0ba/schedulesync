@@ -1,8 +1,8 @@
 import { z } from "zod";
 import {
   createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
+  rateLimitedPublicProcedure,
+  rateLimitedProtectedProcedure,
 } from "@/server/api/trpc";
 import {
   analyzeScheduleImage,
@@ -19,7 +19,7 @@ const eventsInputSchema = z.array(scheduleEventSchema);
 
 export const scheduleRouter = createTRPCRouter({
   // Analyze a schedule image and return structured events
-  analyzeSchedule: publicProcedure
+  analyzeSchedule: rateLimitedPublicProcedure("expensive")
     .input(
       z.object({
         imageBase64: z.string().describe("Base64 encoded image data"),
@@ -31,7 +31,7 @@ export const scheduleRouter = createTRPCRouter({
     }),
 
   // Generate an iCal file from events
-  generateIcal: publicProcedure
+  generateIcal: rateLimitedPublicProcedure("standard")
     .input(
       z.object({
         events: eventsInputSchema,
@@ -55,7 +55,7 @@ export const scheduleRouter = createTRPCRouter({
     }),
 
   // Sync events to Google Calendar
-  syncToGoogleCalendar: protectedProcedure
+  syncToGoogleCalendar: rateLimitedProtectedProcedure("standard")
     .input(
       z.object({
         events: eventsInputSchema,

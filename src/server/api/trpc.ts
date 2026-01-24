@@ -12,6 +12,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
+import { checkRateLimit, type RateLimitTier } from "@/server/services/rate-limiter";
 
 /**
  * 1. CONTEXT
@@ -28,9 +29,15 @@ import { db } from "@/server/db";
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const authResult = await auth();
 
+  // Extract client IP for rate limiting
+  const forwardedFor = opts.headers.get("x-forwarded-for");
+  const realIp = opts.headers.get("x-real-ip");
+  const ip = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? "unknown";
+
   return {
     db,
     auth: authResult,
+    ip,
     ...opts,
   };
 };
@@ -129,3 +136,43 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Rate limit middleware factory
+ *
+ * Creates a middleware that enforces rate limits based on the specified tier.
+ * Uses userId for authenticated users, IP address for anonymous users.
+ */
+const createRateLimitMiddleware = (tier: RateLimitTier) => {
+  return t.middleware(async ({ ctx, next }) => {
+    const isAuthenticated = !!ctx.auth.userId;
+    const identifier = ctx.auth.userId ?? ctx.ip;
+
+    const result = await checkRateLimit(tier, identifier, isAuthenticated);
+
+    if (!result.success) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Rate limit exceeded. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)} seconds.`,
+      });
+    }
+
+    return next();
+  });
+};
+
+/**
+ * Rate-limited public procedure
+ *
+ * Public procedure with rate limiting applied based on the specified tier.
+ */
+export const rateLimitedPublicProcedure = (tier: RateLimitTier) =>
+  publicProcedure.use(createRateLimitMiddleware(tier));
+
+/**
+ * Rate-limited protected procedure
+ *
+ * Protected (authenticated) procedure with rate limiting applied based on the specified tier.
+ */
+export const rateLimitedProtectedProcedure = (tier: RateLimitTier) =>
+  protectedProcedure.use(createRateLimitMiddleware(tier));

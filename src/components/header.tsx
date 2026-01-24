@@ -1,8 +1,7 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Calendar } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+import { HeaderAuth } from "@/components/header-auth";
 
 export function Header() {
   return (
@@ -19,16 +18,7 @@ export function Header() {
           </div>
         </Link>
 
-        <SignedOut>
-          <SignInButton mode="modal">
-            <Button variant="outline" size="sm">
-              Sign in
-            </Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+        <HeaderAuth />
       </div>
     </header>
   );
