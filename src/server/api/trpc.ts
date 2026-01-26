@@ -12,7 +12,10 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import { checkRateLimit, type RateLimitTier } from "@/server/services/rate-limiter";
+import {
+  checkRateLimit,
+  type RateLimitTier,
+} from "@/server/services/rate-limiter";
 
 /**
  * 1. CONTEXT

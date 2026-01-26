@@ -45,26 +45,45 @@ const FAQS = [
 
 export function FAQ() {
   return (
-    <section className="mt-20 w-full">
-      <div className="mb-8 text-center">
-        <h2 className="text-foreground text-2xl font-semibold tracking-tight">
-          Frequently Asked Questions
-        </h2>
-        <p className="text-muted-foreground mt-2">
-          Everything you need to know about converting your schedule.
-        </p>
-      </div>
+    <section className="w-full">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+        {/* Left Column - Section Label + Heading */}
+        <div className="lg:col-span-4">
+          <span className="section-label mb-4 block">Support</span>
+          <h2 className="text-foreground text-3xl leading-tight font-bold tracking-tight lg:text-4xl">
+            Frequently
+            <br />
+            Asked
+            <br />
+            Questions
+          </h2>
+        </div>
 
-      <Accordion type="single" collapsible className="w-full">
-        {FAQS.map((faq, index) => (
-          <AccordionItem key={index} value={`item-${index}`}>
-            <AccordionTrigger className="text-left">
-              {faq.question}
-            </AccordionTrigger>
-            <AccordionContent>{faq.answer}</AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+        {/* Right Column - Accordion */}
+        <div className="lg:col-span-8">
+          <Accordion type="single" collapsible className="w-full">
+            {FAQS.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="border-border/50 border-b py-2"
+              >
+                <AccordionTrigger className="hover:text-accent group [&[data-state=open]]:text-accent py-4 text-left transition-colors">
+                  <div className="flex items-start gap-4">
+                    <span className="text-accent text-sm font-medium">
+                      {(index + 1).toString().padStart(2, "0")}
+                    </span>
+                    <span className="font-medium">{faq.question}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-4 pl-10">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </div>
     </section>
   );
 }
