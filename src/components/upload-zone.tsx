@@ -282,13 +282,11 @@ export function UploadZone() {
   }, [events, startDate, endDate, syncToGoogleCalendar]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card
         className={cn(
-          "relative overflow-hidden border-2 border-dashed transition-all duration-300",
-          isDragging
-            ? "border-orange-500 bg-orange-50/50 shadow-lg shadow-orange-500/10"
-            : "border-border hover:border-orange-400/50 hover:shadow-md",
+          "relative overflow-hidden border transition-all duration-300",
+          isDragging && "border-accent accent-glow",
         )}
       >
         <CardContent className="p-0">
@@ -302,15 +300,13 @@ export function UploadZone() {
                 height={320}
                 unoptimized
               />
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/60 to-transparent p-4 pt-8">
-                <span className="truncate text-sm font-medium text-white">
-                  {fileName}
-                </span>
+              <div className="bg-background/90 absolute inset-x-0 bottom-0 flex items-center justify-between p-4 backdrop-blur-sm">
+                <span className="truncate text-sm font-medium">{fileName}</span>
                 <Button
                   variant="ghost"
                   size="icon-sm"
                   onClick={clearPreview}
-                  className="text-white hover:bg-white/20 hover:text-white"
+                  className="hover:bg-secondary"
                 >
                   <X className="size-4" />
                 </Button>
@@ -322,38 +318,40 @@ export function UploadZone() {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className="flex cursor-pointer flex-col items-center gap-4 px-8 py-16"
+              className="flex cursor-pointer flex-col items-center gap-6 px-8 py-16"
             >
               <div
                 className={cn(
-                  "flex size-16 items-center justify-center rounded-2xl transition-all duration-300",
+                  "flex size-14 items-center justify-center border transition-all duration-300",
                   isDragging
-                    ? "scale-110 bg-orange-500 text-white shadow-lg shadow-orange-500/30"
-                    : "bg-gradient-to-br from-amber-100 to-orange-100 text-orange-600",
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border text-muted-foreground",
                 )}
               >
                 {isDragging ? (
-                  <Upload className="size-7 animate-bounce" />
+                  <Upload className="size-6" />
                 ) : (
-                  <ImageIcon className="size-7" />
+                  <ImageIcon className="size-6" />
                 )}
               </div>
 
               <div className="text-center">
-                <p className="text-foreground text-base font-medium">
+                <p className="font-serif text-lg font-medium">
                   {isDragging
                     ? "Drop your screenshot here"
-                    : "Drop your schedule screenshot"}
+                    : "Drop your schedule"}
                 </p>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className="text-muted-foreground mt-2 text-sm">
                   or click to browse from your device
                 </p>
               </div>
 
-              <div className="text-muted-foreground/70 flex items-center gap-2 text-xs">
-                <span className="bg-muted rounded-full px-2 py-0.5">PNG</span>
-                <span className="bg-muted rounded-full px-2 py-0.5">JPG</span>
-                <span className="bg-muted rounded-full px-2 py-0.5">WebP</span>
+              <div className="text-muted-foreground/70 flex items-center gap-3 text-xs tracking-wider uppercase">
+                <span>PNG</span>
+                <span className="text-border">|</span>
+                <span>JPG</span>
+                <span className="text-border">|</span>
+                <span>WebP</span>
               </div>
 
               <input
@@ -373,17 +371,18 @@ export function UploadZone() {
         <Button
           onClick={handleAnalyze}
           disabled={analyzeSchedule.isPending}
-          className="w-full gap-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
+          variant="accent"
+          className="w-full gap-2"
           size="lg"
         >
           {analyzeSchedule.isPending ? (
             <>
-              <Loader2 className="size-5 animate-spin" />
-              Analyzing schedule... Don&apos;t close the page.
+              <Loader2 className="size-4 animate-spin" />
+              Analyzing...
             </>
           ) : (
             <>
-              <Sparkles className="size-5" />
+              <Sparkles className="size-4" />
               Analyze Schedule
             </>
           )}
@@ -392,9 +391,9 @@ export function UploadZone() {
 
       {/* Error Display */}
       {analyzeSchedule.isError && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="p-4">
-            <p className="text-sm text-red-600">
+            <p className="text-destructive text-sm">
               Failed to analyze schedule. Please try again.
             </p>
           </CardContent>
@@ -406,34 +405,39 @@ export function UploadZone() {
         <Card>
           <CardContent className="p-4">
             <div className="mb-4 flex items-center gap-2">
-              <CheckCircle2 className="size-5 text-green-500" />
-              <h3 className="font-semibold">
-                Found {events.length} event{events.length !== 1 ? "s" : ""}
+              <span className="text-accent text-sm font-medium">
+                {events.length.toString().padStart(2, "0")}
+              </span>
+              <h3 className="font-serif font-medium">
+                Event{events.length !== 1 ? "s" : ""} Found
               </h3>
             </div>
 
-            <div className="max-h-64 space-y-3 overflow-y-auto">
+            <div className="max-h-64 space-y-2 overflow-y-auto">
               {events.map((event, index) => (
                 <div
                   key={index}
                   className={cn(
-                    "rounded-lg border p-3 text-sm transition-colors",
-                    event.isOneTime
-                      ? "border-blue-100 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20"
-                      : "bg-muted/30 border-transparent",
+                    "border-border/50 border p-3 text-sm transition-colors",
+                    event.isOneTime && "border-accent/30 bg-accent/5",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-medium">{event.title}</p>
+                    <div className="flex items-start gap-3">
+                      <span className="text-accent text-xs font-medium">
+                        {(index + 1).toString().padStart(2, "0")}
+                      </span>
+                      <p className="font-medium">{event.title}</p>
+                    </div>
                     {event.isOneTime && (
-                      <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="bg-accent/20 text-accent shrink-0 px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
                         One-time
                       </span>
                     )}
                   </div>
-                  <div className="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                  <div className="text-muted-foreground mt-2 ml-7 flex flex-wrap gap-x-4 gap-y-1 text-xs">
                     <span className="flex items-center gap-1">
-                      <Calendar className="size-3.5" />
+                      <Calendar className="size-3" />
                       {event.isOneTime && event.date ? (
                         <span>
                           {(() => {
@@ -457,12 +461,12 @@ export function UploadZone() {
                       )}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="size-3.5" />
+                      <Clock className="size-3" />
                       {event.startTime} - {event.endTime}
                     </span>
                     {event.location && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="size-3.5" />
+                        <MapPin className="size-3" />
                         {event.location}
                       </span>
                     )}
@@ -479,14 +483,14 @@ export function UploadZone() {
         <Card
           className={cn(
             "transition-colors",
-            !startDate && "border-orange-200 bg-orange-50/50",
+            !startDate && "border-accent/50 bg-accent/5",
           )}
         >
           <CardContent className="p-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">
                 When does your quarter (or semester) start?{" "}
-                <span className="text-red-500">*</span>
+                <span className="text-accent">*</span>
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -526,7 +530,8 @@ export function UploadZone() {
           <CardContent className="p-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                When does your quarter (or semester) end? (Optional)
+                When does your quarter (or semester) end?{" "}
+                <span className="text-muted-foreground">(Optional)</span>
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -558,8 +563,8 @@ export function UploadZone() {
               </Popover>
               {!endDate && (
                 <p className="text-muted-foreground text-xs">
-                  Optional: If provided, recurring events will end on this date
-                  instead of the default 16 weeks from the start date
+                  If provided, recurring events will end on this date instead of
+                  the default 16 weeks
                 </p>
               )}
             </div>
@@ -574,7 +579,7 @@ export function UploadZone() {
             onClick={handleDownloadIcal}
             disabled={generateIcal.isPending || !startDate}
             className="w-full gap-2"
-            variant="outline"
+            variant="editorial"
           >
             {generateIcal.isPending ? (
               <Loader2 className="size-4 animate-spin" />
@@ -588,12 +593,13 @@ export function UploadZone() {
             <Button
               onClick={handleSyncToGoogle}
               disabled={syncToGoogleCalendar.isPending || !startDate}
-              className="w-full gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
+              className="w-full gap-2"
+              variant="outline"
             >
               {syncToGoogleCalendar.isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Syncing to Google Calendar...
+                  Syncing...
                 </>
               ) : (
                 <>
@@ -603,16 +609,16 @@ export function UploadZone() {
               )}
             </Button>
           ) : (
-            <Card className="border-blue-200 bg-blue-50/50">
+            <Card className="border-border bg-secondary/30">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <Calendar className="size-5 text-blue-500" />
+                  <Calendar className="text-muted-foreground size-5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900">
-                      Want to add directly to Google Calendar?
+                    <p className="text-sm font-medium">
+                      Want to sync directly to Google Calendar?
                     </p>
-                    <p className="text-xs text-blue-700">
-                      Sign in with your Google account to sync events
+                    <p className="text-muted-foreground text-xs">
+                      Sign in with your Google account
                     </p>
                   </div>
                   <Button
@@ -630,19 +636,19 @@ export function UploadZone() {
 
           {/* Success message with calendar link */}
           {calendarUrl && (
-            <Card className="border-green-200 bg-green-50">
+            <Card className="border-accent/50 bg-accent/10">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="size-5 shrink-0 text-green-500" />
+                  <CheckCircle2 className="text-accent size-5 shrink-0" />
                   <div className="flex-1 space-y-2">
-                    <p className="text-sm font-medium text-green-900">
+                    <p className="text-sm font-medium">
                       Successfully added to Google Calendar!
                     </p>
                     <a
                       href={calendarUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-green-700 underline hover:text-green-800"
+                      className="text-accent editorial-link inline-flex items-center gap-1 text-sm"
                     >
                       Open in Google Calendar
                       <ExternalLink className="size-3" />
@@ -655,9 +661,9 @@ export function UploadZone() {
 
           {/* Error message for Google Calendar sync */}
           {syncToGoogleCalendar.isError && (
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-destructive/50 bg-destructive/10">
               <CardContent className="p-4">
-                <p className="text-sm text-red-600">
+                <p className="text-destructive text-sm">
                   {syncToGoogleCalendar.error?.message ||
                     "Failed to sync to Google Calendar. Please make sure you've connected your Google account with Calendar permissions."}
                 </p>

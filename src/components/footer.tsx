@@ -2,18 +2,25 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-border/40 bg-background/95 support-[backdrop-filter]:bg-background/60 border-t py-6 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
-        <p className="text-muted-foreground text-sm">
-          &copy; {new Date().getFullYear()} ScheduleSync. All rights reserved.
-        </p>
-        <div className="text-muted-foreground flex items-center gap-6 text-sm">
+    <footer className="border-border/50 border-t py-8">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
+        <div className="flex flex-col items-center gap-1 md:items-start">
+          <span className="font-serif text-lg font-semibold tracking-tight">
+            Schedule<span className="text-accent">Sync</span>
+          </span>
+          <span className="text-muted-foreground text-xs">
+            Screenshots to calendar, effortlessly.
+          </span>
+        </div>
+        <div className="text-muted-foreground flex items-center gap-3 text-sm">
           <Link
             href="/privacy"
-            className="hover:text-foreground transition-colors"
+            className="editorial-link hover:text-foreground transition-colors"
           >
-            Privacy Policy
+            Privacy
           </Link>
+          <span className="text-border">|</span>
+          <span>&copy; {new Date().getFullYear()} ScheduleSync</span>
         </div>
       </div>
     </footer>
