@@ -8,9 +8,6 @@ export function Footer() {
           <span className="font-serif text-lg font-semibold tracking-tight">
             Schedule<span className="text-accent">Sync</span>
           </span>
-          <span className="text-muted-foreground text-xs">
-            Screenshots to calendar, effortlessly.
-          </span>
         </div>
         <div className="text-muted-foreground flex items-center gap-3 text-sm">
           <Link

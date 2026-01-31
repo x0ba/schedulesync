@@ -1,6 +1,5 @@
 import { Header } from "@/components/header";
 import { UploadZone } from "@/components/upload-zone";
-import { FAQ } from "@/components/faq";
 import { type Metadata } from "next";
 
 function getBaseUrl() {
@@ -59,16 +58,12 @@ export default function Home() {
     <>
       <Header />
 
-      <main className="min-h-screen pt-20">
-        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+      <main className="flex min-h-screen flex-col items-center justify-center pt-20">
+        <div className="mx-auto w-full max-w-6xl px-6 py-16 lg:py-24">
           {/* Asymmetrical Hero Grid */}
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
             {/* Left Column - Hero Text */}
             <div className="animate-editorial-fade-in lg:col-span-7">
-              <span className="section-label mb-6 block">
-                Schedule Conversion
-              </span>
-
               <h1 className="text-foreground mb-8 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl">
                 Turn screenshots
                 <br />
@@ -97,13 +92,6 @@ export default function Home() {
             <div className="lg:col-span-5">
               <UploadZone />
             </div>
-          </div>
-        </div>
-
-        {/* FAQ Section - Full Width */}
-        <div className="border-border/50 border-t">
-          <div className="mx-auto max-w-6xl px-6 py-20">
-            <FAQ />
           </div>
         </div>
       </main>
