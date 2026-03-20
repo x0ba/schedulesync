@@ -2,7 +2,6 @@
 
 import { useCallback, useState, useEffect } from "react";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,9 +11,7 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Upload,
-  ImageIcon,
   X,
-  Sparkles,
   Download,
   Calendar,
   Loader2,
@@ -53,9 +50,7 @@ export function UploadZone() {
 
   // Restore state from sessionStorage only after OAuth redirect
   useEffect(() => {
-    // Check for OAuth redirect flag in sessionStorage
     const oauthRedirect = sessionStorage.getItem("schedulesync_oauth_redirect");
-    // Only restore if user is signed in, redirect flag is set, and state is not already set
     if (
       isSignedIn &&
       oauthRedirect === "true" &&
@@ -101,11 +96,8 @@ export function UploadZone() {
         }
         sessionStorage.removeItem(STORAGE_KEYS.endDate);
       }
-      // Remove the redirect flag after restoring
       sessionStorage.removeItem("schedulesync_oauth_redirect");
     }
-    // Intentionally only depend on isSignedIn. We check preview/fileName/events for null
-    // to determine if restoration is needed, but don't want to re-run when they change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn]);
 
@@ -122,12 +114,10 @@ export function UploadZone() {
 
   // Save state to sessionStorage before OAuth redirect
   const saveStateForSignIn = useCallback(() => {
-    // Set OAuth redirect flag
     sessionStorage.setItem("schedulesync_oauth_redirect", "true");
     if (preview) {
-      // Check size before saving (limit to 4MB for safety)
-      const previewSizeBytes = preview.length * 0.75; // base64 overhead: 4/3, so 0.75 to get bytes
-      const maxPreviewSize = 4 * 1024 * 1024; // 4MB
+      const previewSizeBytes = preview.length * 0.75;
+      const maxPreviewSize = 4 * 1024 * 1024;
       if (previewSizeBytes > maxPreviewSize) {
         console.warn(
           "Preview image is too large to save in sessionStorage (exceeds 4MB). Skipping save.",
@@ -176,7 +166,6 @@ export function UploadZone() {
     }
   }, [preview, fileName, events, startDate, endDate]);
 
-  // Combined handler that saves state first, then opens sign-in modal
   const handleSignInClick = useCallback(() => {
     saveStateForSignIn();
     openSignIn();
@@ -185,13 +174,12 @@ export function UploadZone() {
   const analyzeSchedule = api.schedule.analyzeSchedule.useMutation({
     onSuccess: (data) => {
       setEvents(data.events);
-      setCalendarUrl(null); // Reset calendar URL when new events are analyzed
+      setCalendarUrl(null);
     },
   });
 
   const generateIcal = api.schedule.generateIcal.useMutation({
     onSuccess: (data) => {
-      // Download the iCal file
       const blob = new Blob([data.icalContent], {
         type: "text/calendar;charset=utf-8",
       });
@@ -283,97 +271,79 @@ export function UploadZone() {
 
   return (
     <div className="space-y-4">
-      <Card
+      {/* Upload area */}
+      <div
         className={cn(
-          "relative overflow-hidden border transition-all duration-300",
-          isDragging && "border-accent accent-glow",
+          "rounded-lg border-2 border-dashed transition-colors",
+          isDragging ? "border-foreground bg-muted" : "border-border",
         )}
       >
-        <CardContent className="p-0">
-          {preview ? (
-            <div className="relative">
+        {preview ? (
+          <div className="p-4">
+            <div className="relative overflow-hidden rounded">
               <Image
                 src={preview}
                 alt="Schedule preview"
-                className="max-h-80 w-full object-contain"
+                className="max-h-64 w-full object-contain"
                 width={800}
-                height={320}
+                height={256}
                 unoptimized
               />
-              <div className="bg-background/90 absolute inset-x-0 bottom-0 flex items-center justify-between p-4 backdrop-blur-sm">
-                <span className="truncate text-sm font-medium">{fileName}</span>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={clearPreview}
-                  className="hover:bg-secondary"
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
             </div>
-          ) : (
-            <label
-              htmlFor="schedule-upload"
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              className="flex cursor-pointer flex-col items-center gap-6 px-8 py-16"
-            >
-              <div
-                className={cn(
-                  "flex size-14 items-center justify-center border transition-all duration-300",
-                  isDragging
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border text-muted-foreground",
-                )}
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-muted-foreground truncate text-sm">
+                {fileName}
+              </span>
+              <button
+                onClick={clearPreview}
+                className="text-muted-foreground hover:text-foreground ml-2 shrink-0 transition-colors"
               >
-                {isDragging ? (
-                  <Upload className="size-6" />
-                ) : (
-                  <ImageIcon className="size-6" />
-                )}
-              </div>
+                <X className="size-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <label
+            htmlFor="schedule-upload"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className="flex cursor-pointer flex-col items-center gap-3 px-6 py-12"
+          >
+            <Upload
+              className={cn(
+                "size-6",
+                isDragging ? "text-foreground" : "text-muted-foreground",
+              )}
+            />
+            <div className="text-center">
+              <p className="text-sm font-medium">
+                {isDragging
+                  ? "Drop your screenshot here"
+                  : "Drop your schedule screenshot here"}
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                or click to browse &middot; PNG, JPG, WebP
+              </p>
+            </div>
 
-              <div className="text-center">
-                <p className="font-serif text-lg font-medium">
-                  {isDragging
-                    ? "Drop your screenshot here"
-                    : "Drop your schedule"}
-                </p>
-                <p className="text-muted-foreground mt-2 text-sm">
-                  or click to browse from your device
-                </p>
-              </div>
-
-              <div className="text-muted-foreground/70 flex items-center gap-3 text-xs tracking-wider uppercase">
-                <span>PNG</span>
-                <span className="text-border">|</span>
-                <span>JPG</span>
-                <span className="text-border">|</span>
-                <span>WebP</span>
-              </div>
-
-              <input
-                id="schedule-upload"
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={handleInputChange}
-              />
-            </label>
-          )}
-        </CardContent>
-      </Card>
+            <input
+              id="schedule-upload"
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={handleInputChange}
+            />
+          </label>
+        )}
+      </div>
 
       {/* Analyze Button */}
       {preview && !events && (
         <Button
           onClick={handleAnalyze}
           disabled={analyzeSchedule.isPending}
-          variant="accent"
-          className="w-full gap-2"
-          size="lg"
+          className="w-full"
         >
           {analyzeSchedule.isPending ? (
             <>
@@ -381,219 +351,184 @@ export function UploadZone() {
               Analyzing...
             </>
           ) : (
-            <>
-              <Sparkles className="size-4" />
-              Analyze Schedule
-            </>
+            "Analyze Schedule"
           )}
         </Button>
       )}
 
       {/* Error Display */}
       {analyzeSchedule.isError && (
-        <Card className="border-destructive/50 bg-destructive/10">
-          <CardContent className="p-4">
-            <p className="text-destructive text-sm">
-              Failed to analyze schedule. Please try again.
-            </p>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-700">
+            Failed to analyze schedule. Please try again.
+          </p>
+        </div>
       )}
 
       {/* Extracted Events */}
       {events && events.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-accent text-sm font-medium">
-                {events.length.toString().padStart(2, "0")}
-              </span>
-              <h3 className="font-serif font-medium">
-                Event{events.length !== 1 ? "s" : ""} Found
-              </h3>
-            </div>
+        <div className="rounded-lg border">
+          <div className="border-b px-4 py-3">
+            <h3 className="text-sm font-medium">
+              {events.length} event{events.length !== 1 ? "s" : ""} found
+            </h3>
+          </div>
 
-            <div className="max-h-64 space-y-2 overflow-y-auto">
-              {events.map((event, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "border-border/50 border p-3 text-sm transition-colors",
-                    event.isOneTime && "border-accent/30 bg-accent/5",
+          <div className="max-h-64 divide-y overflow-y-auto">
+            {events.map((event, index) => (
+              <div key={index} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-medium">{event.title}</p>
+                  {event.isOneTime && (
+                    <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600">
+                      One-time
+                    </span>
                   )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-3">
-                      <span className="text-accent text-xs font-medium">
-                        {(index + 1).toString().padStart(2, "0")}
-                      </span>
-                      <p className="font-medium">{event.title}</p>
-                    </div>
-                    {event.isOneTime && (
-                      <span className="bg-accent/20 text-accent shrink-0 px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
-                        One-time
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-muted-foreground mt-2 ml-7 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="size-3" />
-                      {event.isOneTime && event.date ? (
-                        <span>
-                          {(() => {
-                            try {
-                              const parsedDate = parse(
-                                event.date,
-                                "yyyy-MM-dd",
-                                new Date(),
-                              );
-                              if (isNaN(parsedDate.getTime())) {
-                                return "Invalid date";
-                              }
-                              return format(parsedDate, "MMM d, yyyy");
-                            } catch {
-                              return event.date; // Fallback to raw string
-                            }
-                          })()}
-                        </span>
-                      ) : (
-                        event.dayOfWeek
-                      )}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="size-3" />
-                      {event.startTime} - {event.endTime}
-                    </span>
-                    {event.location && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="size-3" />
-                        {event.location}
-                      </span>
-                    )}
-                  </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="size-3" />
+                    {event.isOneTime && event.date ? (
+                      <span>
+                        {(() => {
+                          try {
+                            const parsedDate = parse(
+                              event.date,
+                              "yyyy-MM-dd",
+                              new Date(),
+                            );
+                            if (isNaN(parsedDate.getTime())) {
+                              return "Invalid date";
+                            }
+                            return format(parsedDate, "MMM d, yyyy");
+                          } catch {
+                            return event.date;
+                          }
+                        })()}
+                      </span>
+                    ) : (
+                      event.dayOfWeek
+                    )}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="size-3" />
+                    {event.startTime} - {event.endTime}
+                  </span>
+                  {event.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="size-3" />
+                      {event.location}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Start Date Picker */}
       {events && events.length > 0 && (
-        <Card
-          className={cn(
-            "transition-colors",
-            !startDate && "border-accent/50 bg-accent/5",
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">
+            Semester start date <span className="text-red-500">*</span>
+          </label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !startDate && "text-muted-foreground",
+                )}
+              >
+                <CalendarDays className="mr-2 size-4" />
+                {startDate ? format(startDate, "PPP") : "Select a date..."}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={startDate}
+                onSelect={setStartDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          {!startDate && (
+            <p className="text-muted-foreground text-xs">
+              When do your classes begin?
+            </p>
           )}
-        >
-          <CardContent className="p-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                When does your quarter (or semester) start?{" "}
-                <span className="text-accent">*</span>
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarDays className="mr-2 size-4" />
-                    {startDate ? format(startDate, "PPP") : "Select a date..."}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              {!startDate && (
-                <p className="text-muted-foreground text-xs">
-                  Select the date when your classes begin
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       )}
 
       {/* End Date Picker */}
       {events && events.length > 0 && (
-        <Card className="transition-colors">
-          <CardContent className="p-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                When does your quarter (or semester) end?{" "}
-                <span className="text-muted-foreground">(Optional)</span>
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarDays className="mr-2 size-4" />
-                    {endDate ? format(endDate, "PPP") : "Select a date..."}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                    disabled={
-                      startDate
-                        ? (date) =>
-                            isBefore(startOfDay(date), startOfDay(startDate))
-                        : undefined
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
-              {!endDate && (
-                <p className="text-muted-foreground text-xs">
-                  If provided, recurring events will end on this date instead of
-                  the default 16 weeks
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">
+            Semester end date{" "}
+            <span className="text-muted-foreground font-normal">
+              (optional)
+            </span>
+          </label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !endDate && "text-muted-foreground",
+                )}
+              >
+                <CalendarDays className="mr-2 size-4" />
+                {endDate ? format(endDate, "PPP") : "Select a date..."}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                mode="single"
+                selected={endDate}
+                onSelect={setEndDate}
+                initialFocus
+                disabled={
+                  startDate
+                    ? (date) =>
+                        isBefore(startOfDay(date), startOfDay(startDate))
+                    : undefined
+                }
+              />
+            </PopoverContent>
+          </Popover>
+          {!endDate && (
+            <p className="text-muted-foreground text-xs">
+              Defaults to 16 weeks if not set
+            </p>
+          )}
+        </div>
       )}
 
       {/* Export Buttons */}
       {events && events.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2 pt-2">
           <Button
             onClick={handleDownloadIcal}
             disabled={generateIcal.isPending || !startDate}
-            className="w-full gap-2"
-            variant="editorial"
+            className="w-full"
           >
             {generateIcal.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <Download className="size-4" />
             )}
-            Download iCal
+            Download .ics file
           </Button>
 
           {isSignedIn ? (
             <Button
               onClick={handleSyncToGoogle}
               disabled={syncToGoogleCalendar.isPending || !startDate}
-              className="w-full gap-2"
+              className="w-full"
               variant="outline"
             >
               {syncToGoogleCalendar.isPending ? (
@@ -609,66 +544,48 @@ export function UploadZone() {
               )}
             </Button>
           ) : (
-            <Card className="border-border bg-secondary/30">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="text-muted-foreground size-5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">
-                      Want to sync directly to Google Calendar?
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      Sign in with your Google account
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5"
-                    onClick={handleSignInClick}
-                  >
-                    Sign in
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">Google Calendar</p>
+                <p className="text-muted-foreground text-xs">
+                  Sign in to sync directly
+                </p>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleSignInClick}>
+                Sign in
+              </Button>
+            </div>
           )}
 
-          {/* Success message with calendar link */}
+          {/* Success message */}
           {calendarUrl && (
-            <Card className="border-accent/50 bg-accent/10">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="text-accent size-5 shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <p className="text-sm font-medium">
-                      Successfully added to Google Calendar!
-                    </p>
-                    <a
-                      href={calendarUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-accent editorial-link inline-flex items-center gap-1 text-sm"
-                    >
-                      Open in Google Calendar
-                      <ExternalLink className="size-3" />
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-3">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-green-600" />
+              <div>
+                <p className="text-sm font-medium text-green-900">
+                  Added to Google Calendar
+                </p>
+                <a
+                  href={calendarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-green-700 underline underline-offset-2"
+                >
+                  Open in Google Calendar
+                  <ExternalLink className="size-3" />
+                </a>
+              </div>
+            </div>
           )}
 
           {/* Error message for Google Calendar sync */}
           {syncToGoogleCalendar.isError && (
-            <Card className="border-destructive/50 bg-destructive/10">
-              <CardContent className="p-4">
-                <p className="text-destructive text-sm">
-                  {syncToGoogleCalendar.error?.message ||
-                    "Failed to sync to Google Calendar. Please make sure you've connected your Google account with Calendar permissions."}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3">
+              <p className="text-sm text-red-700">
+                {syncToGoogleCalendar.error?.message ||
+                  "Failed to sync to Google Calendar. Please make sure you've connected your Google account with Calendar permissions."}
+              </p>
+            </div>
           )}
         </div>
       )}

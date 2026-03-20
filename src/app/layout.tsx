@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { type Metadata } from "next";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { PostHogProvider } from "./providers";
@@ -111,11 +111,6 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -144,10 +139,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <PostHogProvider>
-        <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
+        <html lang="en" className={dmSans.variable}>
           <body>
-            {/* Grain texture overlay */}
-            <div className="grain-overlay" aria-hidden="true" />
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

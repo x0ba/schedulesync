@@ -58,41 +58,20 @@ export default function Home() {
     <>
       <Header />
 
-      <main className="flex min-h-screen flex-col items-center justify-center pt-20">
-        <div className="mx-auto w-full max-w-6xl px-6 py-16 lg:py-24">
-          {/* Asymmetrical Hero Grid */}
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-            {/* Left Column - Hero Text */}
-            <div className="animate-editorial-fade-in lg:col-span-7">
-              <h1 className="text-foreground mb-8 text-4xl leading-[1.1] font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Turn screenshots
-                <br />
-                into <em className="text-accent not-italic">calendar</em>
-                <br />
-                events
-              </h1>
-
-              <p className="text-muted-foreground mb-10 max-w-md text-lg leading-relaxed">
-                Upload a screenshot of your course schedule and we&apos;ll
-                generate calendar files you can import anywhere. Private by
-                default.
-              </p>
-
-              {/* Feature list with separators */}
-              <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                <span>Any format</span>
-                <span className="text-accent">{"/"}</span>
-                <span>Google, Apple, Outlook</span>
-                <span className="text-accent">{"/"}</span>
-                <span>No account required</span>
-              </div>
-            </div>
-
-            {/* Right Column - Upload Zone */}
-            <div className="lg:col-span-5">
-              <UploadZone />
-            </div>
+      <main className="min-h-screen pt-16">
+        <div className="mx-auto w-full max-w-lg px-4 py-12 sm:py-16">
+          <div className="mb-8 text-center">
+            <h1 className="text-foreground text-2xl font-semibold tracking-tight">
+              Convert your schedule to a calendar file
+            </h1>
+            <p className="text-muted-foreground mt-2 text-sm">
+              Upload a screenshot of your course schedule. We&apos;ll extract
+              the events so you can export them to Google Calendar, Apple
+              Calendar, or Outlook.
+            </p>
           </div>
+
+          <UploadZone />
         </div>
       </main>
     </>
